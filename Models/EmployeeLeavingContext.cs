@@ -11,10 +11,5 @@ namespace ABC.Leaves.Api.Models
             base(options)
         {
         }
-
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        // {
-        //     optionsBuilder.UseSqlite("Filename=./EmployeeLeaving.db");
-        // }
     }
 }
