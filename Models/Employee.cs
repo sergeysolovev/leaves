@@ -1,13 +1,14 @@
-﻿using ABC.Leaves.Api.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ABC.Leaves.Api.Models
 {
     public class Employee
     {
-        public EmployeeRights Rights { get; set; }
-
         [Key]
         public string GmailLogin { get; set; }
+
+        public bool IsAdmin { get; set; }
+
+        public string GoogleCalendarId { get; set; }
     }
 }

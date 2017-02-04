@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ABC.Leaves.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/employee/leave")]
     public class EmployeeLeaveController : Controller
     {
         private readonly IEmployeeLeavesService employeeLeavesService;
@@ -22,18 +22,18 @@ namespace ABC.Leaves.Api.Controllers
             return employeeLeavesService.Apply(employeeLeaveViewModel);
         }
 
-        [Route("approve")]
-        [HttpPost]
-        public IActionResult Approve([FromBody]string employeeLeaveId)
+        [Route("{id}/approve")]
+        [HttpPut]
+        public IActionResult Approve(string id, [FromBody]string accessToken)
         {
-            return employeeLeavesService.Approve(employeeLeaveId);
+            return employeeLeavesService.Approve(id, accessToken);
         }
 
-        [Route("decline")]
-        [HttpPost]
-        public IActionResult Decline([FromBody]string employeeLeaveId)
+        [Route("{id}/decline")]
+        [HttpPut]
+        public IActionResult Decline(string id, [FromBody]string accessToken)
         {
-            return employeeLeavesService.Decline(employeeLeaveId);
+            return employeeLeavesService.Decline(id, accessToken);
         }
     }
 }

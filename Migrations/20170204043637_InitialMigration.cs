@@ -13,7 +13,8 @@ namespace ABC.Leaves.Api.Migrations
                 columns: table => new
                 {
                     GmailLogin = table.Column<string>(nullable: false),
-                    EmployeeRole = table.Column<int>(nullable: false)
+                    GoogleCalendarId = table.Column<string>(nullable: true),
+                    IsAdmin = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,11 +26,10 @@ namespace ABC.Leaves.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    End = table.Column<DateTime>(nullable: true),
+                    End = table.Column<DateTime>(nullable: false),
+                    GoogleAuthAccessToken = table.Column<string>(nullable: true),
                     Start = table.Column<DateTime>(nullable: false),
-                    Status = table.Column<int>(nullable: false),
-                    Token = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false)
+                    Status = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

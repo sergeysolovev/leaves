@@ -16,32 +16,32 @@ namespace ABC.Leaves.Api.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
 
-            modelBuilder.Entity("LivitTest.Models.Employee", b =>
+            modelBuilder.Entity("ABC.Leaves.Api.Models.Employee", b =>
                 {
                     b.Property<string>("GmailLogin")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("Rights");
+                    b.Property<string>("GoogleCalendarId");
+
+                    b.Property<bool>("IsAdmin");
 
                     b.HasKey("GmailLogin");
 
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("LivitTest.Models.EmployeeLeave", b =>
+            modelBuilder.Entity("ABC.Leaves.Api.Models.EmployeeLeave", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime?>("End");
+                    b.Property<DateTime>("End");
+
+                    b.Property<string>("GoogleAuthAccessToken");
 
                     b.Property<DateTime>("Start");
 
                     b.Property<int>("Status");
-
-                    b.Property<string>("Token");
-
-                    b.Property<int>("Type");
 
                     b.HasKey("Id");
 

@@ -22,7 +22,7 @@ namespace ABC.Leaves.Api.Repositories
             }
         }
 
-        public EmployeeLeave Get(string id)
+        public EmployeeLeave Find(string id)
         {
             using (var context = serviceProvider.GetService<EmployeeLeavingContext>())
             {

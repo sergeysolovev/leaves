@@ -31,7 +31,9 @@ namespace ABC.Leaves.Api
             services.AddDbContext<EmployeeLeavingContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
             services.AddTransient<IEmployeeLeavesService, EmployeeLeavesService>();
+            services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             services.AddTransient<IEmployeeLeavesRepository, EmployeeLeavesRepository>();
         }
 
