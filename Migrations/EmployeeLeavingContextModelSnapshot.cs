@@ -1,10 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using ABC.Leaves.Api.Models;
-using ABC.Leaves.Api.Enums;
 
 namespace ABC.Leaves.Api.Migrations
 {

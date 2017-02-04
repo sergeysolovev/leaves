@@ -1,6 +1,5 @@
 ﻿using ABC.Leaves.Api.Services;
 using ABC.Leaves.Api.ViewModels;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABC.Leaves.Api.Controllers
