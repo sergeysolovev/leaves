@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Http;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Calendar.v3;
 using Google.Apis.Gmail.v1;
 using Newtonsoft.Json;
 
@@ -11,6 +12,7 @@ namespace ABC.Leaves.Api.Services
     {
         private readonly string[] scopes =
         {
+            CalendarService.Scope.Calendar,
             GmailService.Scope.GmailReadonly,
             "profile",
         };

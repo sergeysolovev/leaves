@@ -7,7 +7,7 @@ namespace ABC.Leaves.Api.Models
         public DbSet<EmployeeLeave> EmployeeLeaves { get; set; }
         public DbSet<Employee> Employees { get; set; }
 
-        public EmployeeLeavingContext(DbContextOptions<EmployeeLeavingContext> options) :
+        public EmployeeLeavingContext(DbContextOptions options) :
             base(options)
         {
         }

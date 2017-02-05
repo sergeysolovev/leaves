@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ABC.Leaves.Api.Migrations
+namespace LeavesApi.Migrations
 {
     public partial class InitialMigration : Migration
     {
@@ -12,7 +13,6 @@ namespace ABC.Leaves.Api.Migrations
                 columns: table => new
                 {
                     GmailLogin = table.Column<string>(nullable: false),
-                    GoogleCalendarId = table.Column<string>(nullable: true),
                     IsAdmin = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -24,7 +24,8 @@ namespace ABC.Leaves.Api.Migrations
                 name: "EmployeeLeaves",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     End = table.Column<DateTime>(nullable: false),
                     GoogleAuthAccessToken = table.Column<string>(nullable: true),
                     Start = table.Column<DateTime>(nullable: false),

@@ -6,37 +6,28 @@ namespace ABC.Leaves.Api.Repositories
 {
     public class EmployeeLeavesRepository: IEmployeeLeavesRepository
     {
-        private readonly IServiceProvider serviceProvider;
+        private readonly EmployeeLeavingContext context;
 
         public EmployeeLeavesRepository(IServiceProvider serviceProvider)
         {
-            this.serviceProvider = serviceProvider;
+            context = serviceProvider.GetService<EmployeeLeavingContext>();
         }
 
         public void Insert(EmployeeLeave employeeLeave)
         {
-            using (var context = serviceProvider.GetService<EmployeeLeavingContext>())
-            {
-                context.Add(employeeLeave);
-                context.SaveChanges();
-            }
+            context.Add(employeeLeave);
+            context.SaveChanges();
         }
 
         public EmployeeLeave Find(string id)
         {
-            using (var context = serviceProvider.GetService<EmployeeLeavingContext>())
-            {
-                return context.Find<EmployeeLeave>(id);
-            }
+            return context.Find<EmployeeLeave>(id);
         }
 
         public void Update(EmployeeLeave employeeLeave)
         {
-            using (var context = serviceProvider.GetService<EmployeeLeavingContext>())
-            {
-                context.Update(employeeLeave);
-                context.SaveChanges();
-            }
+            context.Update(employeeLeave);
+            context.SaveChanges();
         }
     }
 }

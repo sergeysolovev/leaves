@@ -1,13 +1,15 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ABC.Leaves.Api.Models;
+using ABC.Leaves.Api.Enums;
 
-namespace ABC.Leaves.Api.Migrations
+namespace LeavesApi.Migrations
 {
     [DbContext(typeof(EmployeeLeavingContext))]
-    [Migration("20170204043637_InitialMigration")]
+    [Migration("20170205093008_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,8 +22,6 @@ namespace ABC.Leaves.Api.Migrations
                     b.Property<string>("GmailLogin")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("GoogleCalendarId");
-
                     b.Property<bool>("IsAdmin");
 
                     b.HasKey("GmailLogin");
@@ -31,7 +31,7 @@ namespace ABC.Leaves.Api.Migrations
 
             modelBuilder.Entity("ABC.Leaves.Api.Models.EmployeeLeave", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("End");
