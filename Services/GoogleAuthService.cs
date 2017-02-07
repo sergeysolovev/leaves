@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
-using Google.Apis.Calendar.v3;
-using Google.Apis.Gmail.v1;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -9,13 +9,6 @@ namespace ABC.Leaves.Api.Services
 {
     public class GoogleAuthService : IGoogleAuthService
     {
-        private readonly string[] scopes =
-        {
-            CalendarService.Scope.Calendar,
-            GmailService.Scope.GmailReadonly,
-            "profile",
-        };
-
         private readonly GoogleAuthOptions authOptions;
 
         public GoogleAuthService(IOptions<GoogleAuthOptions> authOptionsAccessor)
@@ -25,13 +18,14 @@ namespace ABC.Leaves.Api.Services
 
         public string GetAuthUrl(string redirectUrl)
         {
-            string baseAddress = authOptions.AuthUri;
-
-            var scope = string.Join("%20", scopes);
-
-            string urlParameters = $"?scope={scope}&redirect_uri={redirectUrl}&response_type=code&client_id={authOptions.ClientId}";
-
-            return baseAddress + urlParameters;
+            return QueryHelpers.AddQueryString(
+                uri: authOptions.AuthUri,
+                queryString: new Dictionary<string, string> {
+                    ["response_type"] = authOptions.ResponseType,
+                    ["client_id"] = authOptions.ClientId,
+                    ["scope"] = String.Join(" ", authOptions.Scopes),
+                    ["redirect_uri"] = redirectUrl
+                });
         }
 
         public string GetAccessToken(string code, string redirectUrl)
