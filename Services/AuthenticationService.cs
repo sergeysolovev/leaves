@@ -16,7 +16,6 @@ namespace ABC.Leaves.Api.Services
             GmailService.Scope.GmailReadonly,
             "profile",
         };
-        private const string redirectUri = "http://localhost:3515/api/authentication/accesstoken";
 
         private readonly ClientSecrets clientSecrets;
 
@@ -28,18 +27,18 @@ namespace ABC.Leaves.Api.Services
             }
         }
 
-        public string GetGoogleAuthenticationUrl()
+        public string GetGoogleAuthenticationUrl(string redirectUrl)
         {
             const string baseAddress = "https://accounts.google.com/o/oauth2/v2/auth";
 
             var scope = string.Join("%20", scopes);
-            
-            string urlParameters = $"?scope={scope}&redirect_uri={redirectUri}&response_type=code&client_id={clientSecrets.ClientId}";
+
+            string urlParameters = $"?scope={scope}&redirect_uri={redirectUrl}&response_type=code&client_id={clientSecrets.ClientId}";
 
             return baseAddress + urlParameters;
         }
 
-        public string GetAccessToken(string code)
+        public string GetAccessToken(string code, string redirectUrl)
         {
             using (var client = new HttpClient())
             {
@@ -48,7 +47,7 @@ namespace ABC.Leaves.Api.Services
                     {"code", code},
                     {"client_id", clientSecrets.ClientId},
                     {"client_secret", clientSecrets.ClientSecret},
-                    {"redirect_uri", redirectUri},
+                    {"redirect_uri", redirectUrl},
                     {"grant_type", "authorization_code"}
                 };
                 var content = new FormUrlEncodedContent(values);

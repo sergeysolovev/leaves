@@ -2,7 +2,7 @@
 {
     public interface IAuthenticationService
     {
-        string GetGoogleAuthenticationUrl();
-        string GetAccessToken(string code);
+        string GetGoogleAuthenticationUrl(string redirectUrl);
+        string GetAccessToken(string code, string redirectUrl);
     }
 }
