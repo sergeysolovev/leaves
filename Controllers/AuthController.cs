@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace ABC.Leaves.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class AuthenticationController : Controller
+    public class AuthController : Controller
     {
         private readonly IAuthenticationService service;
         private const string GoogleAuthRedirectUrlRouteName = "GoogleAuthRedirectUrl";
         private string GoogleAuthRedirectUrl => Url.RouteUrl(
             GoogleAuthRedirectUrlRouteName, null, Request.Scheme);
 
-        public AuthenticationController(IAuthenticationService service)
+        public AuthController(IAuthenticationService service)
         {
             this.service = service;
         }
