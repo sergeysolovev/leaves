@@ -27,6 +27,7 @@ namespace ABC.Leaves.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc();
             services.AddDbContext<EmployeeLeavingContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
