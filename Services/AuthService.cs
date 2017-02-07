@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace ABC.Leaves.Api.Services
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthService : IAuthService
     {
         private readonly string[] scopes =
         {
@@ -19,7 +19,7 @@ namespace ABC.Leaves.Api.Services
 
         private readonly ClientSecrets clientSecrets;
 
-        public AuthenticationService()
+        public AuthService()
         {
             using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
             {

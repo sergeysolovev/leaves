@@ -6,12 +6,12 @@ namespace ABC.Leaves.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : Controller
     {
-        private readonly IAuthenticationService service;
+        private readonly IAuthService service;
         private const string GoogleAuthRedirectUrlRouteName = "GoogleAuthRedirectUrl";
         private string GoogleAuthRedirectUrl => Url.RouteUrl(
             GoogleAuthRedirectUrlRouteName, null, Request.Scheme);
 
-        public AuthController(IAuthenticationService service)
+        public AuthController(IAuthService service)
         {
             this.service = service;
         }
