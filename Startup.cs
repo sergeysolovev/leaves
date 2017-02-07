@@ -27,6 +27,8 @@ namespace ABC.Leaves.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.Configure<GoogleAuthOptions>(Configuration.GetSection("GoogleAuth"));
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc();
             services.AddDbContext<EmployeeLeavingContext>(options =>

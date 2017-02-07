@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Gmail.v1;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace ABC.Leaves.Api.Services
@@ -17,23 +16,20 @@ namespace ABC.Leaves.Api.Services
             "profile",
         };
 
-        private readonly ClientSecrets clientSecrets;
+        private readonly GoogleAuthOptions authOptions;
 
-        public GoogleAuthService()
+        public GoogleAuthService(IOptions<GoogleAuthOptions> authOptionsAccessor)
         {
-            using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
-            {
-                clientSecrets = GoogleClientSecrets.Load(stream).Secrets;
-            }
+            authOptions = authOptionsAccessor.Value;
         }
 
         public string GetAuthUrl(string redirectUrl)
         {
-            const string baseAddress = "https://accounts.google.com/o/oauth2/v2/auth";
+            string baseAddress = authOptions.AuthUri;
 
             var scope = string.Join("%20", scopes);
 
-            string urlParameters = $"?scope={scope}&redirect_uri={redirectUrl}&response_type=code&client_id={clientSecrets.ClientId}";
+            string urlParameters = $"?scope={scope}&redirect_uri={redirectUrl}&response_type=code&client_id={authOptions.ClientId}";
 
             return baseAddress + urlParameters;
         }
@@ -45,8 +41,8 @@ namespace ABC.Leaves.Api.Services
                 var values = new Dictionary<string, string>
                 {
                     {"code", code},
-                    {"client_id", clientSecrets.ClientId},
-                    {"client_secret", clientSecrets.ClientSecret},
+                    {"client_id", authOptions.ClientId},
+                    {"client_secret", authOptions.ClientSecret},
                     {"redirect_uri", redirectUrl},
                     {"grant_type", "authorization_code"}
                 };
