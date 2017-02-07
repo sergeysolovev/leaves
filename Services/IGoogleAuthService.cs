@@ -1,8 +1,8 @@
 ﻿namespace ABC.Leaves.Api.Services
 {
-    public interface IAuthService
+    public interface IGoogleAuthService
     {
-        string GetGoogleAuthenticationUrl(string redirectUrl);
+        string GetAuthUrl(string redirectUrl);
         string GetAccessToken(string code, string redirectUrl);
     }
 }

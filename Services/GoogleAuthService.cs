@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace ABC.Leaves.Api.Services
 {
-    public class AuthService : IAuthService
+    public class GoogleAuthService : IGoogleAuthService
     {
         private readonly string[] scopes =
         {
@@ -19,7 +19,7 @@ namespace ABC.Leaves.Api.Services
 
         private readonly ClientSecrets clientSecrets;
 
-        public AuthService()
+        public GoogleAuthService()
         {
             using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
             {
@@ -27,7 +27,7 @@ namespace ABC.Leaves.Api.Services
             }
         }
 
-        public string GetGoogleAuthenticationUrl(string redirectUrl)
+        public string GetAuthUrl(string redirectUrl)
         {
             const string baseAddress = "https://accounts.google.com/o/oauth2/v2/auth";
 
