@@ -75,7 +75,7 @@ namespace ABC.Leaves.Api.Services
             {
                 return new ForbidResult("Only administrator can change status of user request.");
             }
-            
+
             model.Status = status;
             repository.Update(model);
             return new OkResult();
@@ -83,7 +83,7 @@ namespace ABC.Leaves.Api.Services
 
         private static IActionResult AddGoogleCalendarEvent(string accessToken, EmployeeLeave model)
         {
-            using (var client = new HttpClient())
+            using (var client = new System.Net.Http.HttpClient())
             {
                 var response = client.GetStringAsync("https://www.googleapis.com/calendar/v3/users/me/calendarList?alt=json&access_token=" + accessToken).Result;
                 var calendarList = JsonConvert.DeserializeObject<CalendarList>(response);

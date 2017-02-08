@@ -10,10 +10,13 @@ namespace ABC.Leaves.Api.Services
     public class GoogleAuthService : IGoogleAuthService
     {
         private readonly GoogleAuthOptions authOptions;
+        private readonly IHttpClient httpClient;
 
-        public GoogleAuthService(IOptions<GoogleAuthOptions> authOptionsAccessor)
+        public GoogleAuthService(IOptions<GoogleAuthOptions> authOptionsAccessor,
+            IHttpClient httpClient)
         {
-            authOptions = authOptionsAccessor.Value;
+            this.authOptions = authOptionsAccessor.Value;
+            this.httpClient = httpClient;
         }
 
         public string GetAuthUrl(string redirectUrl)
@@ -30,23 +33,20 @@ namespace ABC.Leaves.Api.Services
 
         public string GetAccessToken(string code, string redirectUrl)
         {
-            using (var client = new HttpClient())
+            var values = new Dictionary<string, string>
             {
-                var values = new Dictionary<string, string>
-                {
-                    {"code", code},
-                    {"client_id", authOptions.ClientId},
-                    {"client_secret", authOptions.ClientSecret},
-                    {"redirect_uri", redirectUrl},
-                    {"grant_type", "authorization_code"}
-                };
-                var content = new FormUrlEncodedContent(values);
-                var response = client.PostAsync("https://www.googleapis.com/oauth2/v4/token", content).Result;
-                var responseString = response.Content.ReadAsStringAsync().Result;
-                var reponseValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-                var token = reponseValues["access_token"];
-                return token;
-            }
+                {"code", code},
+                {"client_id", authOptions.ClientId},
+                {"client_secret", authOptions.ClientSecret},
+                {"redirect_uri", redirectUrl},
+                {"grant_type", "authorization_code"}
+            };
+            var content = new FormUrlEncodedContent(values);
+            var response = httpClient.PostAsync("https://www.googleapis.com/oauth2/v4/token", content).Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
+            var reponseValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+            var token = reponseValues["access_token"];
+            return token;
         }
     }
 }

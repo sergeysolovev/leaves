@@ -38,6 +38,7 @@ namespace ABC.Leaves.Api
             services.AddTransient<IEmployeeLeavesService, EmployeeLeavesService>();
             services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             services.AddTransient<IEmployeeLeavesRepository, EmployeeLeavesRepository>();
+            services.AddSingleton<IHttpClient, HttpClient>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
