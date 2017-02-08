@@ -42,7 +42,7 @@ namespace ABC.Leaves.Api.Services
                 {"grant_type", "authorization_code"}
             };
             var content = new FormUrlEncodedContent(values);
-            var response = httpClient.PostAsync("https://www.googleapis.com/oauth2/v4/token", content).Result;
+            var response = httpClient.PostAsync(authOptions.TokenUri, content).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
             var reponseValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
             var token = reponseValues["access_token"];
