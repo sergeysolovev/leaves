@@ -1,5 +1,5 @@
 ﻿using ABC.Leaves.Api.Services;
-using ABC.Leaves.Api.ViewModels;
+using ABC.Leaves.Api.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABC.Leaves.Api.Controllers
@@ -16,9 +16,9 @@ namespace ABC.Leaves.Api.Controllers
 
         [Route("apply")]
         [HttpPost]
-        public IActionResult Apply([FromBody]EmployeeLeaveViewModel employeeLeaveViewModel)
+        public IActionResult Apply([FromBody]EmployeeLeaveDto employeeLeaveDto)
         {
-            return service.Apply(employeeLeaveViewModel);
+            return service.Apply(employeeLeaveDto);
         }
 
         [Route("{id}/approve")]

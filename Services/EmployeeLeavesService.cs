@@ -6,7 +6,7 @@ using ABC.Leaves.Api.Enums;
 using ABC.Leaves.Api.Helpers;
 using ABC.Leaves.Api.Models;
 using ABC.Leaves.Api.Repositories;
-using ABC.Leaves.Api.ViewModels;
+using ABC.Leaves.Api.Dto;
 using Google.Apis.Calendar.v3.Data;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -26,13 +26,13 @@ namespace ABC.Leaves.Api.Services
             this.mapper = mapper;
         }
 
-        public IActionResult Apply(EmployeeLeaveViewModel viewModel)
+        public IActionResult Apply(EmployeeLeaveDto employeeLeaveDto)
         {
-            if (viewModel == null)
+            if (employeeLeaveDto == null)
             {
                 return new BadRequestResult();
             }
-            var model = mapper.Map<EmployeeLeaveViewModel, EmployeeLeave>(viewModel);
+            var model = mapper.Map<EmployeeLeaveDto, EmployeeLeave>(employeeLeaveDto);
             model.Status = EmployeeLeaveStatus.Applied;
             repository.Insert(model);
             return new OkResult();

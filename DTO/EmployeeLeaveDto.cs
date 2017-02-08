@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ABC.Leaves.Api.ViewModels
+namespace ABC.Leaves.Api.Dto
 {
-    public class EmployeeLeaveViewModel
+    public class EmployeeLeaveDto
     {
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
