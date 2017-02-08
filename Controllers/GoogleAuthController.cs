@@ -28,12 +28,7 @@ namespace ABC.Leaves.Api.Controllers
         [HttpGet("accesstoken/{code?}", Name = AuthRedirectUrlRouteName)]
         public async Task<IActionResult> GetAccessToken(string code)
         {
-            var accessToken = await service.GetAccessTokenAsync(code, AuthRedirectUrl);
-            if (accessToken == null)
-            {
-                return NotFound();
-            }
-            return Ok(accessToken);
+            return await service.GetAccessTokenAsync(code, AuthRedirectUrl);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -32,7 +34,7 @@ namespace ABC.Leaves.Api.Services
                 });
         }
 
-        public async Task<string> GetAccessTokenAsync(string code, string redirectUrl)
+        public async Task<ObjectResult> GetAccessTokenAsync(string code, string redirectUrl)
         {
             var httpContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -44,14 +46,24 @@ namespace ABC.Leaves.Api.Services
             });
             using (var response = await httpClient.PostAsync(authOptions.TokenUri, httpContent))
             {
-                var accessToken = String.Empty;
                 var result = await response.Content.ReadAsStringAsync();
-                var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
-                if (jsonResult.TryGetValue("access_token", out accessToken))
+                if (response.IsSuccessStatusCode)
                 {
-                    return accessToken;
+                    string accessToken;
+                    var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
+                    if (jsonResult.TryGetValue("access_token", out accessToken))
+                    {
+                        return new OkObjectResult(accessToken);
+                    }
                 }
-                return null;
+                var error = new ErrorDetails
+                {
+                    StatusCode = (int)HttpStatusCode.NotFound,
+                    DeveloperMessage =
+                        "Failed to exchange an authorization code for an access token. " +
+                        $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
+                };
+                return new ObjectResult(error) { StatusCode = error.StatusCode };
             }
         }
     }
