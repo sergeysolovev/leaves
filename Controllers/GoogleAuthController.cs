@@ -1,4 +1,5 @@
-﻿using ABC.Leaves.Api.Services;
+﻿using System.Threading.Tasks;
+using ABC.Leaves.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABC.Leaves.Api.Controllers
@@ -25,9 +26,13 @@ namespace ABC.Leaves.Api.Controllers
 
         // GET api/googleauth/accesstoken?code=4/kc0pD2Jvif6If6tdt61hFsLTtG2TuSnYNNxMQHESBXE
         [HttpGet("accesstoken/{code?}", Name = AuthRedirectUrlRouteName)]
-        public IActionResult GetAccessToken(string code)
+        public async Task<IActionResult> GetAccessToken(string code)
         {
-            var accessToken = service.GetAccessToken(code, AuthRedirectUrl);
+            var accessToken = await service.GetAccessTokenAsync(code, AuthRedirectUrl);
+            if (accessToken == null)
+            {
+                return NotFound();
+            }
             return Ok(accessToken);
         }
     }

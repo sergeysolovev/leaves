@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -31,22 +32,27 @@ namespace ABC.Leaves.Api.Services
                 });
         }
 
-        public string GetAccessToken(string code, string redirectUrl)
+        public async Task<string> GetAccessTokenAsync(string code, string redirectUrl)
         {
-            var values = new Dictionary<string, string>
+            var httpContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"code", code},
-                {"client_id", authOptions.ClientId},
-                {"client_secret", authOptions.ClientSecret},
-                {"redirect_uri", redirectUrl},
-                {"grant_type", "authorization_code"}
-            };
-            var content = new FormUrlEncodedContent(values);
-            var response = httpClient.PostAsync(authOptions.TokenUri, content).Result;
-            var responseString = response.Content.ReadAsStringAsync().Result;
-            var reponseValues = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-            var token = reponseValues["access_token"];
-            return token;
+                ["code"] = code,
+                ["client_id"] = authOptions.ClientId,
+                ["client_secret"] = authOptions.ClientSecret,
+                ["redirect_uri"] = redirectUrl,
+                ["grant_type"] = "authorization_code"
+            });
+            using (var response = await httpClient.PostAsync(authOptions.TokenUri, httpContent))
+            {
+                var accessToken = String.Empty;
+                var result = await response.Content.ReadAsStringAsync();
+                var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
+                if (jsonResult.TryGetValue("access_token", out accessToken))
+                {
+                    return accessToken;
+                }
+                return null;
+            }
         }
     }
 }
