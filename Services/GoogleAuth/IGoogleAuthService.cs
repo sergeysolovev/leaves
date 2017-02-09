@@ -6,6 +6,7 @@ namespace ABC.Leaves.Api.GoogleAuth
     public interface IGoogleAuthService
     {
         GetAuthUrlOutput GetAuthUrl(GetAuthUrlInput input);
-        Task<GetAccessTokenAsyncOutput> GetAccessTokenAsync(GetAccessTokenAsyncInput input);
+        Task<GetAccessTokenOutput> GetAccessTokenAsync(GetAccessTokenInput input);
+        Task<GetAccessTokenInfoOutput> GetAccessTokenInfoAsync(GetAccessTokenInfoInput input);
     }
 }
