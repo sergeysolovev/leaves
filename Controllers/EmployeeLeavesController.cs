@@ -25,7 +25,7 @@ namespace ABC.Leaves.Api.Controllers
         // PATCH api/employee/leave/{id}/approve
         [HttpPatchAttribute("{id}/approve")]
         [MiddlewareFilter(typeof(AuthorizationPipeline))]
-        public IActionResult Approve(string id)
+        public IActionResult Approve(int id)
         {
             return service.Approve(id);
         }
@@ -33,7 +33,7 @@ namespace ABC.Leaves.Api.Controllers
         // PATCH api/employee/leave/{id}/decline
         [HttpPatchAttribute("{id}/decline")]
         [MiddlewareFilter(typeof(AuthorizationPipeline))]
-        public IActionResult Decline(string id)
+        public IActionResult Decline(int id)
         {
             return service.Decline(id);
         }

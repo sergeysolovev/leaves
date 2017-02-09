@@ -38,9 +38,8 @@ namespace ABC.Leaves.Api.Services
             return new OkResult();
         }
 
-        public IActionResult Approve(string id)
+        public IActionResult Approve(int id)
         {
-            if (id == null) return new BadRequestObjectResult("ID can not be null");
             var model = repository.Find(id);
             if (model == null) return new NotFoundResult();
             if (model.Status == EmployeeLeaveStatus.Approved) return new BadRequestObjectResult("The request was already approved.");
@@ -53,9 +52,8 @@ namespace ABC.Leaves.Api.Services
             return result;
         }
 
-        public IActionResult Decline(string id)
+        public IActionResult Decline(int id)
         {
-            if (id == null) return new BadRequestObjectResult("ID can not be null");
             var model = repository.Find(id);
             if (model == null) return new NotFoundResult();
             if (model.Status == EmployeeLeaveStatus.Approved) return new BadRequestObjectResult("The request was approved, can not decline it.");

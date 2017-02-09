@@ -19,7 +19,7 @@ namespace ABC.Leaves.Api.Repositories
             context.SaveChanges();
         }
 
-        public EmployeeLeave Find(string id)
+        public EmployeeLeave Find(int id)
         {
             return context.Find<EmployeeLeave>(id);
         }

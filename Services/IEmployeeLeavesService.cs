@@ -6,7 +6,7 @@ namespace ABC.Leaves.Api.Services
     public interface IEmployeeLeavesService
     {
         IActionResult Apply(EmployeeLeaveDto EmployeeLeaveDto);
-        IActionResult Approve(string id);
-        IActionResult Decline(string id);
+        IActionResult Approve(int id);
+        IActionResult Decline(int id);
     }
 }
