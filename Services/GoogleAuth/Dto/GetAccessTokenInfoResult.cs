@@ -2,7 +2,7 @@
 
 namespace ABC.Leaves.Api.GoogleAuth.Dto
 {
-    public class GetAccessTokenInfoOutput
+    public class GetAccessTokenInfoResult
     {
         public string Email { get; set; }
         public ErrorDto Error { get; set; }

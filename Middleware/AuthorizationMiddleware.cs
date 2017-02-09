@@ -31,15 +31,14 @@ namespace ABC.Leaves.Api.Middleware
             string accessToken = GetOAuthAccessToken(context);
             if (accessToken != null)
             {
-                var input = new GetAccessTokenInfoInput { AccessToken = accessToken };
-                var output = await googleAuthService.GetAccessTokenInfoAsync(input);
-                if (output.Error != null)
+                var result = await googleAuthService.GetAccessTokenInfoAsync(accessToken);
+                if (result.Error != null)
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return;
                 }
-                var userEmail = output.Email;
-                if (!employeeRepository.CheckUserIsAdmin(output.Email))
+                var userEmail = result.Email;
+                if (!employeeRepository.CheckUserIsAdmin(result.Email))
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return;

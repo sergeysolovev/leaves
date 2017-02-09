@@ -1,6 +1,6 @@
 ﻿namespace ABC.Leaves.Api.GoogleAuth.Dto
 {
-    public class GetAuthUrlOutput
+    public class GetAuthUrlResult
     {
         public string AuthUrl { get; set; }
     }

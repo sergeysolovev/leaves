@@ -24,9 +24,9 @@ namespace ABC.Leaves.Api.GoogleAuth
             this.httpClient = httpClient;
         }
 
-        public GetAuthUrlOutput GetAuthUrl(GetAuthUrlInput input)
+        public GetAuthUrlResult GetAuthUrl(string redirectUrl)
         {
-            return new GetAuthUrlOutput
+            return new GetAuthUrlResult
             {
                 AuthUrl = QueryHelpers.AddQueryString(
                     uri: authOptions.AuthUri,
@@ -34,19 +34,19 @@ namespace ABC.Leaves.Api.GoogleAuth
                         ["response_type"] = authOptions.ResponseType,
                         ["client_id"] = authOptions.ClientId,
                         ["scope"] = String.Join(" ", authOptions.Scopes),
-                        ["redirect_uri"] = input.RedirectUrl
+                        ["redirect_uri"] = redirectUrl
                     })
             };
         }
 
-        public async Task<GetAccessTokenOutput> GetAccessTokenAsync(GetAccessTokenInput input)
+        public async Task<GetAccessTokenResult> GetAccessTokenAsync(string code, string redirectUrl)
         {
             var httpContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                ["code"] = input.Code,
+                ["code"] = code,
                 ["client_id"] = authOptions.ClientId,
                 ["client_secret"] = authOptions.ClientSecret,
-                ["redirect_uri"] = input.RedirectUrl,
+                ["redirect_uri"] = redirectUrl,
                 ["grant_type"] = "authorization_code"
             });
             using (var response = await httpClient.PostAsync(authOptions.TokenUri, httpContent))
@@ -58,7 +58,7 @@ namespace ABC.Leaves.Api.GoogleAuth
                     var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
                     if (jsonResult.TryGetValue("access_token", out accessToken))
                     {
-                        return new GetAccessTokenOutput { AccessToken = accessToken };
+                        return new GetAccessTokenResult { AccessToken = accessToken };
                     }
                 }
                 var error = new ErrorDto
@@ -68,16 +68,16 @@ namespace ABC.Leaves.Api.GoogleAuth
                         "Failed to exchange an authorization code for an access token. " +
                         $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
                 };
-                return new GetAccessTokenOutput { Error = error };
+                return new GetAccessTokenResult { Error = error };
             }
         }
 
-        public async Task<GetAccessTokenInfoOutput> GetAccessTokenInfoAsync(GetAccessTokenInfoInput input)
+        public async Task<GetAccessTokenInfoResult> GetAccessTokenInfoAsync(string accessToken)
         {
             string tokenInfoUrl = QueryHelpers.AddQueryString(
                 uri: authOptions.TokenInfoUri,
                 name: "access_token",
-                value: input.AccessToken);
+                value: accessToken);
             using (var response = await httpClient.GetAsync(tokenInfoUrl))
             {
                 var result = await response.Content.ReadAsStringAsync();
@@ -93,9 +93,9 @@ namespace ABC.Leaves.Api.GoogleAuth
                             StatusCode = (int)HttpStatusCode.NotFound,
                             DeveloperMessage = "Failed to retrieve 'email' value from access token."
                         };
-                        return new GetAccessTokenInfoOutput { Error = error };
+                        return new GetAccessTokenInfoResult { Error = error };
                     }
-                    return new GetAccessTokenInfoOutput { Email = email };
+                    return new GetAccessTokenInfoResult { Email = email };
                 }
                 error = new ErrorDto
                 {
@@ -104,7 +104,7 @@ namespace ABC.Leaves.Api.GoogleAuth
                         "An error occured when retrieving access token info. " +
                         $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
                 };
-                return new GetAccessTokenInfoOutput { Error = error };
+                return new GetAccessTokenInfoResult { Error = error };
             }
         }
     }
