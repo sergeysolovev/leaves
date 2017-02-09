@@ -63,7 +63,6 @@ namespace ABC.Leaves.Api.GoogleAuth
                 }
                 var error = new ErrorDto
                 {
-                    StatusCode = (int)HttpStatusCode.NotFound,
                     DeveloperMessage =
                         "Failed to exchange an authorization code for an access token. " +
                         $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
@@ -90,7 +89,6 @@ namespace ABC.Leaves.Api.GoogleAuth
                     {
                         error = new ErrorDto
                         {
-                            StatusCode = (int)HttpStatusCode.NotFound,
                             DeveloperMessage = "Failed to retrieve 'email' value from access token."
                         };
                         return new GetAccessTokenInfoResult { Error = error };
@@ -99,7 +97,6 @@ namespace ABC.Leaves.Api.GoogleAuth
                 }
                 error = new ErrorDto
                 {
-                    StatusCode = (int)HttpStatusCode.NotFound,
                     DeveloperMessage =
                         "An error occured when retrieving access token info. " +
                         $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
