@@ -1,29 +1,21 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using ABC.Leaves.Api.Repositories;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using ABC.Leaves.Api.GoogleAuth;
-using ABC.Leaves.Api.GoogleAuth.Dto;
 using System.Net;
+using ABC.Leaves.Api.Authorization;
 
 namespace ABC.Leaves.Api.Middleware
 {
     public class AuthorizationMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly IEmployeeRepository employeeRepository;
-        private readonly IGoogleAuthService googleAuthService;
+        IAuthorizationService authorizationService;
 
         public AuthorizationMiddleware(RequestDelegate next,
-            IEmployeeRepository employeeRepository,
-            IGoogleAuthService googleAuthService)
+            IAuthorizationService authorizationService)
         {
             this.next = next;
-            this.employeeRepository = employeeRepository;
-            this.googleAuthService = googleAuthService;
+            this.authorizationService = authorizationService;
         }
 
         public async Task Invoke(HttpContext context)
@@ -31,20 +23,16 @@ namespace ABC.Leaves.Api.Middleware
             string accessToken = GetOAuthAccessToken(context);
             if (accessToken != null)
             {
-                var result = await googleAuthService.GetAccessTokenInfoAsync(accessToken);
-                if (result.Error != null)
+                var result = await authorizationService.AuthorizeAdminAsync(accessToken);
+                if (!result.IsAuthorized)
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    return;
-                }
-                var userEmail = result.Email;
-                if (!employeeRepository.CheckUserIsAdmin(result.Email))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    await context.Response.WriteAsync(result.Error?.DeveloperMessage);
                     return;
                 }
                 await next(context);
             }
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         }
 
         private static string GetOAuthAccessToken(HttpContext context)
