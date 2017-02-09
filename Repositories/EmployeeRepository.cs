@@ -17,5 +17,11 @@ namespace ABC.Leaves.Api.Repositories
         {
             return context.Find<Employee>(gmailLogin);
         }
+
+        public bool CheckUserIsAdmin(string email)
+        {
+            var user = Find(email);
+            return (user != null && user.IsAdmin);
+        }
     }
 }

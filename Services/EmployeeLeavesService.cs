@@ -38,44 +38,33 @@ namespace ABC.Leaves.Api.Services
             return new OkResult();
         }
 
-        public IActionResult Approve(string id, string accessToken)
+        public IActionResult Approve(string id)
         {
             if (id == null) return new BadRequestObjectResult("ID can not be null");
             var model = repository.Find(id);
             if (model == null) return new NotFoundResult();
             if (model.Status == EmployeeLeaveStatus.Approved) return new BadRequestObjectResult("The request was already approved.");
 
-            var result = ChangeStatus(model, EmployeeLeaveStatus.Approved, accessToken);
+            var result = ChangeStatus(model, EmployeeLeaveStatus.Approved);
             if (result is OkResult)
             {
-                return AddGoogleCalendarEvent(accessToken, model);
+                return AddGoogleCalendarEvent(model.GoogleAuthAccessToken, model);
             }
             return result;
         }
 
-        public IActionResult Decline(string id, string accessToken)
+        public IActionResult Decline(string id)
         {
             if (id == null) return new BadRequestObjectResult("ID can not be null");
             var model = repository.Find(id);
             if (model == null) return new NotFoundResult();
             if (model.Status == EmployeeLeaveStatus.Approved) return new BadRequestObjectResult("The request was approved, can not decline it.");
 
-            return ChangeStatus(model, EmployeeLeaveStatus.Declined, accessToken);
+            return ChangeStatus(model, EmployeeLeaveStatus.Declined);
         }
 
-        private IActionResult ChangeStatus(EmployeeLeave model, EmployeeLeaveStatus status, string accessToken)
+        private IActionResult ChangeStatus(EmployeeLeave model, EmployeeLeaveStatus status)
         {
-            if (accessToken == null)
-            {
-                return new BadRequestObjectResult("Access token can not be null");
-            }
-            var gmailLogin = UserInfoHelper.GetUserGmailAddress(accessToken);
-            var user = employeeRepository.Find(gmailLogin);
-            if (user == null || !user.IsAdmin)
-            {
-                return new ForbidResult("Only administrator can change status of user request.");
-            }
-
             model.Status = status;
             repository.Update(model);
             return new OkResult();

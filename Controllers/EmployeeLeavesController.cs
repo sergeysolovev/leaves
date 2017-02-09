@@ -1,6 +1,7 @@
 ﻿using ABC.Leaves.Api.Services;
 using ABC.Leaves.Api.Dto;
 using Microsoft.AspNetCore.Mvc;
+using ABC.Leaves.Api.Middleware;
 
 namespace ABC.Leaves.Api.Controllers
 {
@@ -14,25 +15,27 @@ namespace ABC.Leaves.Api.Controllers
             this.service = service;
         }
 
-        [Route("apply")]
+        // POST api/employee/leave
         [HttpPost]
-        public IActionResult Apply([FromBody]EmployeeLeaveDto employeeLeaveDto)
+        public IActionResult Post([FromBody]EmployeeLeaveDto employeeLeaveDto)
         {
             return service.Apply(employeeLeaveDto);
         }
 
-        [Route("{id}/approve")]
-        [HttpPut]
-        public IActionResult Approve(string id, [FromBody]string accessToken)
+        // PATCH api/employee/leave/{id}/approve
+        [HttpPatchAttribute("{id}/approve")]
+        [MiddlewareFilter(typeof(AuthorizationPipeline))]
+        public IActionResult Approve(string id)
         {
-            return service.Approve(id, accessToken);
+            return service.Approve(id);
         }
 
-        [Route("{id}/decline")]
-        [HttpPut]
-        public IActionResult Decline(string id, [FromBody]string accessToken)
+        // PATCH api/employee/leave/{id}/decline
+        [HttpPatchAttribute("{id}/decline")]
+        [MiddlewareFilter(typeof(AuthorizationPipeline))]
+        public IActionResult Decline(string id)
         {
-            return service.Decline(id, accessToken);
+            return service.Decline(id);
         }
     }
 }
