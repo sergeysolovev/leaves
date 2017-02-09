@@ -5,6 +5,6 @@ namespace ABC.Leaves.Api.Authorization
 {
     public interface IAuthorizationService
     {
-        Task<AuthorizeAdminResult> AuthorizeAdmin(string accessToken);
+        Task<AuthorizeAdminResult> AuthorizeAdminAsync(string accessToken);
     }
 }

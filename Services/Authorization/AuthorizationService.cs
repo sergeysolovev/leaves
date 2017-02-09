@@ -17,7 +17,7 @@ namespace ABC.Leaves.Api.Authorization
             this.googleAuthService = googleAuthService;
         }
 
-        public async Task<AuthorizeAdminResult> AuthorizeAdmin(string accessToken)
+        public async Task<AuthorizeAdminResult> AuthorizeAdminAsync(string accessToken)
         {
             var result = await googleAuthService.GetAccessTokenInfoAsync(accessToken);
             if (result.Error != null)
