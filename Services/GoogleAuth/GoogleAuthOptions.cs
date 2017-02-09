@@ -1,4 +1,4 @@
-namespace ABC.Leaves.Api.Services
+namespace ABC.Leaves.Api.GoogleAuth
 {
     public class GoogleAuthOptions
     {

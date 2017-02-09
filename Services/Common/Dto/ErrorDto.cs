@@ -1,11 +1,11 @@
 using System;
 using System.Net;
 
-namespace ABC.Leaves.Api.Services
+namespace ABC.Leaves.Api.Services.Dto
 {
-    public class ErrorDetails
+    public class ErrorDto
     {
-        public ErrorDetails() { }
+        public ErrorDto() { }
         public int StatusCode { get; set; } = (int)HttpStatusCode.InternalServerError;
         public string DeveloperMessage { get; set; } = String.Empty;
         public string UserMessage { get; set; } = String.Empty;

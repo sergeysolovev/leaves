@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ABC.Leaves.Api.Repositories;
 using ABC.Leaves.Api.Services;
+using ABC.Leaves.Api.GoogleAuth;
 using ABC.Leaves.Api.Models;
 
 namespace ABC.Leaves.Api
