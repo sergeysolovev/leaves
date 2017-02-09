@@ -9,6 +9,7 @@ using ABC.Leaves.Api.Repositories;
 using ABC.Leaves.Api.Services;
 using ABC.Leaves.Api.GoogleAuth;
 using ABC.Leaves.Api.Models;
+using ABC.Leaves.Api.Authorization;
 
 namespace ABC.Leaves.Api
 {
@@ -37,6 +38,7 @@ namespace ABC.Leaves.Api
             services.AddAutoMapper();
             services.AddTransient<IGoogleAuthService, GoogleAuthService>();
             services.AddTransient<IEmployeeLeavesService, EmployeeLeavesService>();
+            services.AddTransient<IAuthorizationService, AuthorizationService>();
             services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             services.AddTransient<IEmployeeLeavesRepository, EmployeeLeavesRepository>();
             services.AddSingleton<IHttpClient, HttpClient>();
