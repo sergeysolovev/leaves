@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ABC.Leaves.Api.GoogleAuth.Dto;
@@ -9,6 +8,7 @@ using ABC.Leaves.Api.Services.Dto;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ABC.Leaves.Api.GoogleAuth
 {
@@ -52,22 +52,27 @@ namespace ABC.Leaves.Api.GoogleAuth
             using (var response = await httpClient.PostAsync(authOptions.TokenUri, httpContent))
             {
                 var result = await response.Content.ReadAsStringAsync();
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    string accessToken;
-                    var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
-                    if (jsonResult.TryGetValue("access_token", out accessToken))
+                    return new GetAccessTokenResult
                     {
-                        return new GetAccessTokenResult { AccessToken = accessToken };
-                    }
+                        Error = new ErrorDto
+                        {
+                            DeveloperMessage =
+                                "Failed to exchange an authorization code for an access token. " +
+                                $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
+                        }
+                    };
                 }
-                var error = new ErrorDto
+                string accessToken = RetrieveAccessToken(result);
+                if (accessToken == null)
                 {
-                    DeveloperMessage =
-                        "Failed to exchange an authorization code for an access token. " +
-                        $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
-                };
-                return new GetAccessTokenResult { Error = error };
+                    return new GetAccessTokenResult
+                    {
+                        Error = new ErrorDto("An error occured when retrieving access token")
+                    };
+                }
+                return new GetAccessTokenResult { AccessToken = accessToken };
             }
         }
 
@@ -119,6 +124,19 @@ namespace ABC.Leaves.Api.GoogleAuth
                 };
             }
             return new ValidateAccessTokenResult { IsValid = true };
+        }
+
+        private static string RetrieveAccessToken(string tokenResponse)
+        {
+            try
+            {
+                var json = JObject.Parse(tokenResponse);
+                return (string)json["access_token"];
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
         }
     }
 }
