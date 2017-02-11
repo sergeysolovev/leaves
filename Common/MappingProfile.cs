@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using ABC.Leaves.Api.Models;
-using ABC.Leaves.Api.Dto;
+using ABC.Leaves.Api.Leaves.Dto;
 
 namespace ABC.Leaves.Api
 {

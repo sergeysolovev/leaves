@@ -2,10 +2,7 @@
 
 namespace ABC.Leaves.Api.Repositories
 {
-    public interface IEmployeeLeavesRepository
+    public interface IEmployeeLeavesRepository : IRepository<EmployeeLeave, int>
     {
-        void Insert(EmployeeLeave employeeLeave);
-        EmployeeLeave Find(int id);
-        void Update(EmployeeLeave model);
     }
 }

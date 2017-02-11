@@ -8,8 +8,10 @@ using Microsoft.Extensions.Logging;
 using ABC.Leaves.Api.Repositories;
 using ABC.Leaves.Api.Services;
 using ABC.Leaves.Api.GoogleAuth;
+using ABC.Leaves.Api.Leaves;
 using ABC.Leaves.Api.Models;
 using ABC.Leaves.Api.Authorization;
+using ABC.Leaves.Api.GoogleCalendar;
 
 namespace ABC.Leaves.Api
 {
@@ -30,13 +32,15 @@ namespace ABC.Leaves.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
-            services.Configure<GoogleAuthOptions>(Configuration.GetSection("GoogleAuth"));
+            services.Configure<GoogleAuthOptions>(Configuration.GetSection("GoogleServices:Auth"));
+            services.Configure<GoogleCalendarOptions>(Configuration.GetSection("GoogleServices:Calendar"));
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc();
             services.AddDbContext<EmployeeLeavingContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper();
             services.AddTransient<IGoogleAuthService, GoogleAuthService>();
+            services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
             services.AddTransient<IEmployeeLeavesService, EmployeeLeavesService>();
             services.AddTransient<IAuthorizationService, AuthorizationService>();
             services.AddTransient<IEmployeeRepository, EmployeeRepository>();

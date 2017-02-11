@@ -1,26 +1,18 @@
-﻿using System;
-using ABC.Leaves.Api.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using ABC.Leaves.Api.Models;
 
 namespace ABC.Leaves.Api.Repositories
 {
-    public class EmployeeRepository : IEmployeeRepository
+    public class EmployeeRepository : RepositoryBase<Employee, string>, IEmployeeRepository
     {
-        private readonly EmployeeLeavingContext context;
-
-        public EmployeeRepository(IServiceProvider serviceProvider)
+        public EmployeeRepository(EmployeeLeavingContext dbContext)
+            : base(dbContext)
         {
-            context = serviceProvider.GetService<EmployeeLeavingContext>();
         }
 
-        public Employee Find(string gmailLogin)
-        {
-            return context.Find<Employee>(gmailLogin);
-        }
-
+        // TODO: move to domain level
         public bool CheckUserIsAdmin(string email)
         {
-            var user = Find(email);
+            var user = GetById(email);
             return (user != null && user.IsAdmin);
         }
     }

@@ -104,5 +104,21 @@ namespace ABC.Leaves.Api.GoogleAuth
                 return new GetAccessTokenInfoResult { Error = error };
             }
         }
+
+        public async Task<ValidateAccessTokenResult> ValidateAccessTokenAsync(string accessToken)
+        {
+            var getTokenResult = await GetAccessTokenInfoAsync(accessToken);
+            if (getTokenResult.Error != null)
+            {
+                return new ValidateAccessTokenResult {
+                    IsValid = false,
+                    Error = new ErrorDto {
+                        DeveloperMessage = "Google access token is not valid. " +
+                            getTokenResult.Error.DeveloperMessage
+                    }
+                };
+            }
+            return new ValidateAccessTokenResult { IsValid = true };
+        }
     }
 }

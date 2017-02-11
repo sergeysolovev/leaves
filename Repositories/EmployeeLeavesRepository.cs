@@ -1,33 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ABC.Leaves.Api.Models;
-using System;
+﻿using ABC.Leaves.Api.Models;
 
 namespace ABC.Leaves.Api.Repositories
 {
-    public class EmployeeLeavesRepository: IEmployeeLeavesRepository
+    public class EmployeeLeavesRepository: RepositoryBase<EmployeeLeave, int>, IEmployeeLeavesRepository
     {
-        private readonly EmployeeLeavingContext context;
-
-        public EmployeeLeavesRepository(IServiceProvider serviceProvider)
+        public EmployeeLeavesRepository(EmployeeLeavingContext dbContext)
+            : base(dbContext)
         {
-            context = serviceProvider.GetService<EmployeeLeavingContext>();
-        }
-
-        public void Insert(EmployeeLeave employeeLeave)
-        {
-            context.Add(employeeLeave);
-            context.SaveChanges();
-        }
-
-        public EmployeeLeave Find(int id)
-        {
-            return context.Find<EmployeeLeave>(id);
-        }
-
-        public void Update(EmployeeLeave employeeLeave)
-        {
-            context.Update(employeeLeave);
-            context.SaveChanges();
         }
     }
 }

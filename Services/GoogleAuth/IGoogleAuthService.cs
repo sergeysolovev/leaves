@@ -8,5 +8,6 @@ namespace ABC.Leaves.Api.GoogleAuth
         GetAuthUrlResult GetAuthUrl(string redirectUrl);
         Task<GetAccessTokenResult> GetAccessTokenAsync(string code, string redirectUrl);
         Task<GetAccessTokenInfoResult> GetAccessTokenInfoAsync(string accessToken);
+        Task<ValidateAccessTokenResult> ValidateAccessTokenAsync(string accessToken);
     }
 }

@@ -21,9 +21,7 @@
     "Microsoft.NETCore.App": {
       "version": "1.1.0",
       "type": "platform"
-    },
-    "Google.Apis.Gmail.v1": "1.20.0.754",
-    "Google.Apis.Calendar.v3": "1.20.0.759"
+    }
   },
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.1.0-preview4-final",

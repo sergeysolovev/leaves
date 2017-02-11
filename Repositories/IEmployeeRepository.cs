@@ -2,9 +2,8 @@
 
 namespace ABC.Leaves.Api.Repositories
 {
-    public interface IEmployeeRepository
+    public interface IEmployeeRepository : IRepository<Employee, string>
     {
-        Employee Find(string gmailLogin);
         bool CheckUserIsAdmin(string email);
     }
 }

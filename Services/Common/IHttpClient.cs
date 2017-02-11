@@ -7,6 +7,7 @@ namespace ABC.Leaves.Api.Services
     public interface IHttpClient : IDisposable
     {
         Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content);
+        Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content, string accessToken);
         Task<HttpResponseMessage> GetAsync(string requestUri);
     }
 }
