@@ -64,7 +64,7 @@ namespace ABC.Leaves.Api.GoogleAuth
                         }
                     };
                 }
-                string accessToken = RetrieveAccessToken(result);
+                string accessToken = JsonHelper.GetPropertyValue(result, "access_token");
                 if (accessToken == null)
                 {
                     return new GetAccessTokenResult
@@ -85,28 +85,26 @@ namespace ABC.Leaves.Api.GoogleAuth
             using (var response = await httpClient.GetAsync(tokenInfoUrl))
             {
                 var result = await response.Content.ReadAsStringAsync();
-                ErrorDto error;
                 if (response.IsSuccessStatusCode)
                 {
-                    string email;
-                    var jsonResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(result);
-                    if (!jsonResult.TryGetValue("email", out email))
+                    string email = JsonHelper.GetPropertyValue(result, "email");
+                    if (email == null)
                     {
-                        error = new ErrorDto
+                        return new GetAccessTokenInfoResult
                         {
-                            DeveloperMessage = "Failed to retrieve 'email' value from access token."
+                            Error = new ErrorDto("Failed to retrieve 'email' value from access token.")
                         };
-                        return new GetAccessTokenInfoResult { Error = error };
                     }
                     return new GetAccessTokenInfoResult { Email = email };
                 }
-                error = new ErrorDto
+                return new GetAccessTokenInfoResult
                 {
-                    DeveloperMessage =
-                        "An error occured when retrieving access token info. " +
-                        $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
+                    Error = new ErrorDto
+                    {
+                        DeveloperMessage = "An error occured when retrieving access token info. " +
+                            $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
+                    }
                 };
-                return new GetAccessTokenInfoResult { Error = error };
             }
         }
 
@@ -124,19 +122,6 @@ namespace ABC.Leaves.Api.GoogleAuth
                 };
             }
             return new ValidateAccessTokenResult { IsValid = true };
-        }
-
-        private static string RetrieveAccessToken(string tokenResponse)
-        {
-            try
-            {
-                var json = JObject.Parse(tokenResponse);
-                return (string)json["access_token"];
-            }
-            catch (JsonException)
-            {
-                return null;
-            }
         }
     }
 }

@@ -8,7 +8,6 @@ using ABC.Leaves.Api.Services;
 using ABC.Leaves.Api.Services.Dto;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace ABC.Leaves.Api.GoogleAuth
 {
@@ -47,7 +46,7 @@ namespace ABC.Leaves.Api.GoogleAuth
                         }
                     };
                 }
-                string eventUri = GetEventUri(result);
+                string eventUri = JsonHelper.GetPropertyValue(result, "htmlLink");
                 if (String.IsNullOrEmpty(eventUri))
                 {
                     return new AddEventResult
@@ -69,19 +68,6 @@ namespace ABC.Leaves.Api.GoogleAuth
                 Summary = calendarOptions.LeaveEventSummary,
                 Description = calendarOptions.LeaveEventDescription
             };
-        }
-
-        private static string GetEventUri(string postEventResponse)
-        {
-            try
-            {
-                var json = JObject.Parse(postEventResponse);
-                return (string)json["htmlLink"];
-            }
-            catch (JsonException)
-            {
-                return null;
-            }
         }
     }
 }
