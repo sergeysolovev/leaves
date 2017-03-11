@@ -53,7 +53,6 @@
   },
   "publishOptions": {
     "include": [
-      "wwwroot",
       "web.config",
       "appsettings.json"
     ]
@@ -62,6 +61,6 @@
     "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
   },
   "tooling": {
-    "defaultNamespace": "ABC.Leaves.Api"
+    "defaultNamespace": "AbcLeaves.Api"
   }
 }
