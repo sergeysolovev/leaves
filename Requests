@@ -1,0 +1,46 @@
+# ya29.GlvwA2ZHnDlhdWl5vBK3xvF8ACocVFnUmlI9avXfyOkXGTHPZ_-R2L5tTewSpp1mHv5ZAfOsPf8aKIOuFz0GQAv5mFd7hkTo0UhjVFpow1QziWgYUSzOrWKwTpt4
+
+# apply a leave
+
+curl -v -H "Content-Type: application/json" -d '{"start":"2017-02-12T21:00:00Z","end":"2017-02-13T21:00:00Z","googleAuthAccessToken":"ya29.GmHvAy7sYeuBY6C7-QqFFgVQuB64Ykj7UZMoVjgl-Dz9Y-XXKO--f5zboyJHdB7wuFy8sulxAZHM9mPLgYpLOaGQ_4_gqVLrWGnXcYfAwcDSO79aLKjMlJcc4YBuKHRhsFwr"}' http://localhost:5000/api/employee/leave
+
+# approve the leave
+
+curl -v -H "Content-Type: application/json" -H "Authorization: Bearer ya29.GmHvAwlgZYO25SThsOjxoYwGv3ESdui32BUXzJvHw3fk920zhKfO9oqts5oT9Xom7GgvunlMRrby2OU-OTrgpJf5WTXaeWaoJYl-6yPBM73eRzer_ICvvqz7WQWX4H-6Gg_c" -X PATCH http://localhost:5000/api/employee/leave/1/approve
+
+# get google auth url
+
+curl -v http://localhost:5000/api/googleauth/url && echo
+
+# create an event
+curl -v -X POST -d "" https://www.googleapis.com/calendar/v3/calendars/primary/events
+
+# variations
+
+# insert event response
+
+"{\n \"kind\": \"calendar#event\",\n \"etag\": \"\\\"2973606262243000\\\"\",\n \"id\": \"eh9s72l495281sube7ln4omcno\",\n \"status\": \"confirmed\",\n \"htmlLink\": \"https://www.google.com/calendar/event?eid=ZWg5czcybDQ5NTI4MXN1YmU3bG40b21jbm8gbWVAc2VyZ2V5c29sb3Zldi5jb20\",\n \"created\": \"2017-02-11T08:52:11.000Z\",\n \"updated\": \"2017-02-11T08:52:11.178Z\",\n \"summary\": \"Leaving Work Space Time\",\n \"description\": \"You do not work at this time.\",\n \"creator\": {\n  \"email\": \"me@sergeysolovev.com\",\n  \"displayName\": \"Sergey Solovev\",\n  \"self\": true\n },\n \"organizer\": {\n  \"email\": \"me@sergeysolovev.com\",\n  \"displayName\": \"Sergey Solovev\",\n  \"self\": true\n },\n \"start\": {\n  \"dateTime\": \"2016-02-12T16:00:00Z\"\n },\n \"end\": {\n  \"dateTime\": \"2016-02-13T16:00:00Z\"\n },\n \"iCalUID\": \"eh9s72l495281sube7ln4omcno@google.com\",\n \"sequence\": 0,\n \"hangoutLink\": \"https://plus.google.com/hangouts/_/sergeysolovev.com/me?hceid=bWVAc2VyZ2V5c29sb3Zldi5jb20.eh9s72l495281sube7ln4omcno\",\n \"reminders\": {\n  \"useDefault\": false,\n  \"overrides\": [\n   {\n    \"method\": \"sms\",\n    \"minutes\": 10\n   },\n   {\n    \"method\": \"email\",\n    \"minutes\": 1440\n   }\n  ]\n }\n}\n"
+
+# event request:
+
+"{\"description\":\"Your request has been approved.\",\"summary\":\"ABC Leave of Abscense\",\"end\":{\"dateTime\":\"2017-02-13T16:00:00.000Z\"},\"start\":{\"dateTime\":\"2017-02-12T16:00:00.000Z\"}}"
+
+https://accounts.google.com/o/oauth2/v2/auth?client_id=894287932839-ds2lefpfabmnft7u4udl15r5i49marke.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fsignin-oidc&response_type=code+id_token&scope=openid+profile&response_mode=form_post&nonce=636232935405882770.ODdiZjkxN2UtZDRmYy00OWRmLTg4YjAtZDI1NTIxMDJkMDFkODMxNWE3NmEtNThlOS00YTE3LWJmNmMtNGNlNjQ5ZmQ0ZjY2&state=CfDJ8IZ7FyxYMEpIriyteB3ajcb5se9jqDnBD2fsc1hoef9ABsuHgWlqZLIOnzgY3KupLy4aUQ0gXb5wK3uQooNI2tpMP2WJ3AmIKe2V5Wd9rLH4d3jwytJxCuzdSWHs5uvao_QS_DN9bVUMnqXGpPuEtCJ3QQe8eX8W1lTUVcAm-x21lDU-WZckjOrCvNp_yabw-aKeJqFaLB6k8VrL63zv9lhJdNnd1dgk0YtUOoIzuomSiKj8ci52BaUdHolR0ES2h-iN0wF0H2b2uhdffwRhwmYKYOXbmRKaUOmbzUWlkQ2-DPshxf-loiWhKVvQjFkC_6L0yP9Db9vQvP9oJm6KhZY&from_login=1&as=-21090d2a5cc052c9&authuser=0
+
+http://localhost:5000/mvcclient/google-oauth/code/accept?code=4/ftFnrx09dnLCWB5Et8T3BlhfK2moKk6vKTsCJojUiMM&scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/plus.me+https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/gmail.readonly
+
+
+http://localhost:5000/mvcclient/google-oidc/token
+
+http://localhost:5000/mvcclient/googleapis/grant-access?idToken=eyJhbGciOiJSUzI1NiIsImtpZCI6IjU2MjI2YWVlZTNkMWZiZGFhOTQxNGVlMGFkZjdhZDQ4MTY1MDJiYjEifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0ODg1MjQ1NTYsImV4cCI6MTQ4ODUyODE1NiwiYXRfaGFzaCI6InRqaDhma3V5dHIyLTkwS2xvSkxUU1EiLCJzdWIiOiIxMDE0NjE3NTU4NzQ3OTMzNjI1MjQiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibm9uY2UiOiI2MzYyNDEyMTM1NDg1NjkwNDAuWVRFMFpHVTBNV1l0WkdOaVlTMDBOVGsxTFdKbFlUUXRNREk1T1dVMU9HVXlNREpsWmpJMFkyRmxaakl0TjJVeU15MDBOVFU1TFRnM09XSXRPRGRpTkRJMlpUZzNNbVU0IiwiYXVkIjoiODk0Mjg3OTMyODM5LWRzMmxlZnBmYWJtbmZ0N3U0dWRsMTVyNWk0OW1hcmtlLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXpwIjoiODk0Mjg3OTMyODM5LWRzMmxlZnBmYWJtbmZ0N3U0dWRsMTVyNWk0OW1hcmtlLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiaGQiOiJzZXJnZXlzb2xvdmV2LmNvbSIsImVtYWlsIjoibWVAc2VyZ2V5c29sb3Zldi5jb20iLCJuYW1lIjoiU2VyZ2V5IFNvbG92ZXYiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDUuZ29vZ2xldXNlcmNvbnRlbnQuY29tLy1XVkZlbS01M0Mwdy9BQUFBQUFBQUFBSS9BQUFBQUFBQUFEdy9IYU04MjRiNVdmVS9zOTYtYy9waG90by5qcGciLCJnaXZlbl9uYW1lIjoiU2VyZ2V5IiwiZmFtaWx5X25hbWUiOiJTb2xvdmV2IiwibG9jYWxlIjoiZW4tTVkifQ.IsbgOT1cXXKOoTmPKwynOoRjyTkfE7a4pMS8g8QY8ptxvriz_tHF7qZpJHfbVSzaHbdugeeqQtJOFpOZMkrCexvV1BXjnRm2tHTY4stxgdQEK2GkWyvWo4dvnpsMcNjTjq_udHW-PYvRgT4uIlluYLBnD6CtPV05FUvAQ-WKDmjTLZLrKeRQtzmSVkcXizLBCxorYjfSxw5y7ogpbyZSitxZkj0cqrni8Y8k2vFDDep421_4W4arr1BKJVQB3lO86b98Xc5TEzBsNrUC-4EAsITt2ljchC5lkRb24tRTXfGbGonOOD3jBj3BVjZhDIkMUoQd5b4p89r_rcLYiDIkmA
+
+
+Tasks:
+(*) Separate client and server projects
+
+
+(*) Client: implement api services
+(+) Implement admin authorization
+(+) Deprecate grant admin access
+(+) Leaves controller: API + Client Wrap
+(+) All API methods should be wrapped by the client: Register

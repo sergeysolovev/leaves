@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using ABC.Leaves.Api.Models;
-using ABC.Leaves.Api.Leaves.Dto;
 
 namespace ABC.Leaves.Api
 {
@@ -8,8 +7,8 @@ namespace ABC.Leaves.Api
     {
         public MappingProfile()
         {
-            CreateMap<EmployeeLeaveDto, EmployeeLeave>();
-            CreateMap<EmployeeLeave, EmployeeLeaveDto>();
+            CreateMap<LeavePostDto, LeaveApplyDto>();
+            CreateMap<LeaveApplyDto, Leave>();
         }
     }
 }

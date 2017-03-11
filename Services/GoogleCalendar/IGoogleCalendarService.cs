@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ABC.Leaves.Api.GoogleCalendar.Dto;
 
-namespace ABC.Leaves.Api.GoogleAuth
+namespace ABC.Leaves.Api.Services
 {
     public interface IGoogleCalendarService
     {

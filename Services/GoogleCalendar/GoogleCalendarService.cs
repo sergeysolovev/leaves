@@ -2,25 +2,23 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using ABC.Leaves.Api.GoogleCalendar;
-using ABC.Leaves.Api.GoogleCalendar.Dto;
-using ABC.Leaves.Api.Services;
-using ABC.Leaves.Api.Services.Dto;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 
-namespace ABC.Leaves.Api.GoogleAuth
+namespace ABC.Leaves.Api.Services
 {
     public class GoogleCalendarService : IGoogleCalendarService
     {
         private readonly GoogleCalendarOptions calendarOptions;
-        private readonly IHttpClient httpClient;
+        private readonly HttpClient backchannel;
 
         public GoogleCalendarService(IOptions<GoogleCalendarOptions> calendarOptionsAccessor,
-            IHttpClient httpClient)
+            HttpClientHandler httpBackchannelHandler)
         {
             this.calendarOptions = calendarOptionsAccessor.Value;
-            this.httpClient = httpClient;
+            this.backchannel = new HttpClient(httpBackchannelHandler);
         }
 
         public async Task<AddEventResult> AddEventAsync(string accessToken, DateTime start, DateTime end)
@@ -31,31 +29,26 @@ namespace ABC.Leaves.Api.GoogleAuth
                 {
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });
-            var httpContent = new StringContent(calendarEventJson, Encoding.UTF8, "application/json");
             var eventsUri = calendarOptions.EventsUri;
-            using (var response = await httpClient.PostAsync(eventsUri, httpContent, accessToken))
+            var request = new HttpRequestMessage(HttpMethod.Post, eventsUri);
+            request.Content = new StringContent(calendarEventJson, Encoding.UTF8, "application/json");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            using (var response = await backchannel.SendAsync(request))
             {
                 var result = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new AddEventResult
-                    {
-                        Error = new ErrorDto {
-                            DeveloperMessage = "An error occured when adding event to the Google calendar. " +
-                                $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
-                        }
-                    };
+                    return AddEventResult.Fail(
+                        "An error occured when adding event to the Google calendar. " +
+                        $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
+                    );
                 }
-                string eventUri = JsonHelper.GetPropertyValue(result, "htmlLink");
+                string eventUri = GetEventUriFromJson(result);
                 if (String.IsNullOrEmpty(eventUri))
                 {
-                    return new AddEventResult
-                    {
-                        EventAdded = true,
-                        Error = new ErrorDto("Failed to retrieve event uri from created event resource")
-                    };
+                    // todo: log error
                 }
-                return new AddEventResult { EventAdded = true, EventUri = eventUri };
+                return AddEventResult.Success(eventUri);
             }
         }
 
@@ -68,6 +61,19 @@ namespace ABC.Leaves.Api.GoogleAuth
                 Summary = calendarOptions.LeaveEventSummary,
                 Description = calendarOptions.LeaveEventDescription
             };
+        }
+
+        private string GetEventUriFromJson(string json)
+        {
+            try
+            {
+                var jsonObject = JObject.Parse(json);
+                return jsonObject.Value<string>("htmlLink");
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
         }
     }
 }

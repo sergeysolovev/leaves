@@ -6,8 +6,12 @@ namespace ABC.Leaves.Api
 {
     public class Program
     {
+        public static string[] CommandLineArgs { get; private set;}
+
         public static void Main(string[] args)
         {
+            CommandLineArgs = args;
+
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())

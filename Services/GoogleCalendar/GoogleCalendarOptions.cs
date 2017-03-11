@@ -1,4 +1,4 @@
-namespace ABC.Leaves.Api.GoogleCalendar
+namespace ABC.Leaves.Api.Services
 {
     public class GoogleCalendarOptions
     {
