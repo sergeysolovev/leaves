@@ -1,11 +1,8 @@
 ﻿using System.Threading.Tasks;
-using ABC.Leaves.Api.Domain;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Domain;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using System.Linq;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class HasPersistentClaimAuthorizationHandler : AuthorizationHandler<HasPersistentClaimRequirement>
     {

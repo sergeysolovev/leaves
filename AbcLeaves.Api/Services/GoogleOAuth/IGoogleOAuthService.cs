@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 
-namespace ABC.Leaves.Api.Services
+namespace AbcLeaves.Api.Services
 {
     public interface IGoogleOAuthService
     {
-        string BuildOfflineAccessChallengeUrl(string redirectUrl, string state);
-        Task<OAuthExchangeResult> ExchangeCode(string code, string redirectUrl);
-        Task<OAuthExchangeResult> ExchangeRefreshToken(string refreshToken);
+        Task<ExchangeAuthCodeResult> ExchangeAuthCode(string code, string redirectUrl);
+        Task<ExchangeRefreshTokenResult> ExchangeRefreshToken(string refreshToken);
+        Task<VerifyAccessResult> ValidateRefreshTokenAsync(string refreshToken);
     }
 }

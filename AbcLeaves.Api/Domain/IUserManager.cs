@@ -1,16 +1,19 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Models;
 
-namespace ABC.Leaves.Api.Domain
+namespace AbcLeaves.Api.Domain
 {
     public interface IUserManager
     {
-        Task<OperationResult> GetUserRefreshToken(AppUser user);
-        Task<AppUserResult> CreateUserAsync(ClaimsPrincipal principal);
-        Task<AppUserResult> GetUserAsync(ClaimsPrincipal principal);
-
+        Task<OperationResult> GetRefreshTokenAsync(AppUser user);
+        Task<OperationResult> SaveRefreshTokenAsync(AppUser user, string token);
+        Task<FindUserResult> FindUserByIdAsync(string userId);
+        Task<FindUserResult> FindUserAsync(ClaimsPrincipal principal);
+        Task<AddUserResult> AddUserAsync(ClaimsPrincipal principal);
+        Task<UserResult> EnsureUserCreatedAsync(ClaimsPrincipal principal);
         OperationResult GetEmailClaim(ClaimsPrincipal principal);
+        OperationResult GetSubjectClaim(ClaimsPrincipal principal);
         Task<bool> HasPersistentClaim(ClaimsPrincipal principal, string claimType, string requiredValue);
     }
 }

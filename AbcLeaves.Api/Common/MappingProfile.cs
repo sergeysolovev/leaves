@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Models;
+using AbcLeaves.Api.Services;
+using System;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class MappingProfile : Profile
     {
@@ -9,6 +11,20 @@ namespace ABC.Leaves.Api
         {
             CreateMap<LeavePostDto, LeaveApplyDto>();
             CreateMap<LeaveApplyDto, Leave>();
+            CreateMap<UserEventPublishDto, CalendarEventAddDto>();
+            CreateMap<Leave, UserEventPublishDto>().AfterMap((src, dst) => {
+                dst.Title = LeaveEventDefaults.Title;
+                dst.Description = LeaveEventDefaults.Description;
+            });
+
+            CreateMap<CalendarEventAddDto, CalendarEvent>().AfterMap((src, dst) =>
+                dst.Summary = src.Title
+            );
+
+            CreateMap<DateTime, CalendarEventDateTime>()
+                .ConstructUsing(dateTime => new CalendarEventDateTime(dateTime));
+
+            //CreateMap<CalendarEventAddDto, CalendarEvent>();
         }
     }
 }

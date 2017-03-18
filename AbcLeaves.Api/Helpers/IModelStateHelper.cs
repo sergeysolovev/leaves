@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace ABC.Leaves.Api.Helpers
+namespace AbcLeaves.Api.Helpers
 {
     public interface IModelStateHelper
     {

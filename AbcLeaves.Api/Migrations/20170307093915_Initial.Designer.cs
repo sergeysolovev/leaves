@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Models;
 
 namespace AbcLeaves.Migrations
 {
@@ -16,7 +16,7 @@ namespace AbcLeaves.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
 
-            modelBuilder.Entity("ABC.Leaves.Api.Models.AppUser", b =>
+            modelBuilder.Entity("AbcLeaves.Api.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -66,7 +66,7 @@ namespace AbcLeaves.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ABC.Leaves.Api.Models.Leave", b =>
+            modelBuilder.Entity("AbcLeaves.Api.Models.Leave", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -196,9 +196,9 @@ namespace AbcLeaves.Migrations
                     b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("ABC.Leaves.Api.Models.Leave", b =>
+            modelBuilder.Entity("AbcLeaves.Api.Models.Leave", b =>
                 {
-                    b.HasOne("ABC.Leaves.Api.Models.AppUser", "User")
+                    b.HasOne("AbcLeaves.Api.Models.AppUser", "User")
                         .WithMany("Leaves")
                         .HasForeignKey("UserId");
                 });
@@ -213,7 +213,7 @@ namespace AbcLeaves.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ABC.Leaves.Api.Models.AppUser")
+                    b.HasOne("AbcLeaves.Api.Models.AppUser")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -221,7 +221,7 @@ namespace AbcLeaves.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ABC.Leaves.Api.Models.AppUser")
+                    b.HasOne("AbcLeaves.Api.Models.AppUser")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -234,7 +234,7 @@ namespace AbcLeaves.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ABC.Leaves.Api.Models.AppUser")
+                    b.HasOne("AbcLeaves.Api.Models.AppUser")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

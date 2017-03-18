@@ -5,23 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ABC.Leaves.Api.Repositories;
-using ABC.Leaves.Api.Models;
-using ABC.Leaves.Api.Services;
+using AbcLeaves.Api.Repositories;
+using AbcLeaves.Api.Models;
+using AbcLeaves.Api.Services;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.Http;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Newtonsoft.Json;
-using ABC.Leaves.Api.Helpers;
-using ABC.Leaves.Api.Domain;
+using AbcLeaves.Api.Helpers;
+using AbcLeaves.Api.Domain;
 using Microsoft.AspNetCore.Authorization;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class Startup
     {
@@ -33,7 +29,7 @@ namespace ABC.Leaves.Api
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddCommandLine(Program.CommandLineArgs);
+                .AddCommandLine(Program.Args);
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
@@ -41,26 +37,15 @@ namespace ABC.Leaves.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
-
-            // server:
-            services.Configure<Services.GoogleOAuthOptions>(Configuration.GetSection("GoogleServices:Auth"));
-            services.Configure<GoogleCalendarOptions>(Configuration.GetSection("GoogleServices:Calendar"));
-
-            // client:
-            services.Configure<Helpers.GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
-
+            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
             services.AddRouting(options => options.LowercaseUrls = true);
-
             services
                 .AddMvc()
-                // server:
                 .AddJsonOptions(options => {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
-
-            // server:
             services.AddAuthorization(options => {
                 options.AddPolicy("CanApproveLeaves",
                     policyBuilder => policyBuilder.AddRequirements(
@@ -69,11 +54,9 @@ namespace ABC.Leaves.Api
                     policyBuilder => policyBuilder.AddRequirements(
                         new HasPersistentClaimRequirement("DeclineLeaves", "Allowed")));
             });
-
-            // server:
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
-                optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves")));
+                optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
@@ -81,25 +64,19 @@ namespace ABC.Leaves.Api
                 options.Cookies.ApplicationCookie.AutomaticAuthenticate = false;
                 options.Cookies.ApplicationCookie.AutomaticChallenge = true;
             });
-
-            services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
-
-            services.AddSingleton<HttpClientHandler>();
-
-            services.AddSingleton<IConfiguration>(Configuration);
-
-            // client:
-            services.AddTransient<IGoogleOAuthHelper, GoogleOAuthHelper>();
-
-            // server:
             services.AddAutoMapper();
-
+            services.AddSingleton<HttpClientHandler>();
+            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
             services.AddTransient<IModelStateHelper, ModelStateHelper>();
+            services.AddTransient<IBackChannelHelper, BackChannelHelper>();
             services.AddTransient<IGoogleOAuthService, GoogleOAuthService>();
             services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
             services.AddTransient<ILeavesRepository, LeavesRepository>();
             services.AddTransient<IUserManager, UserManager>();
             services.AddTransient<ILeavesManager, LeavesManager>();
+            services.AddTransient<IGoogleCalendarManager, GoogleCalendarManager>();
+            services.AddTransient<IGoogleApisAuthManager, GoogleApisAuthManager>();
 
             services.AddSwaggerGen(options =>
             {
@@ -118,60 +95,26 @@ namespace ABC.Leaves.Api
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            // server:
             app.UseIdentity();
             app.UseJwtBearerAuthentication(new JwtBearerOptions {
                 Authority = "https://accounts.google.com",
-                Audience = Configuration["GoogleServices:Auth:ClientId"],
+                Audience = Configuration["GoogleOAuth:ClientId"],
                 TokenValidationParameters = new TokenValidationParameters {
                     ValidateIssuerSigningKey = true
                 },
                 BackchannelHttpHandler = app.ApplicationServices.GetService<HttpClientHandler>()
             });
 
-            // client:
-            app.UseCookieAuthentication(new CookieAuthenticationOptions {
-                AuthenticationScheme = "GoogleOpenIdConnectCookies",
-                AutomaticAuthenticate = false,
-                AutomaticChallenge = false
-            });
-            var openIdConnectOptions = new OpenIdConnectOptions() {
-                AuthenticationScheme = "GoogleOpenIdConnect",
-                SignInScheme = "GoogleOpenIdConnectCookies",
-                Authority = "https://accounts.google.com",
-                ResponseType = OpenIdConnectResponseType.IdToken,
-                CallbackPath = new PathString("/signin-oidc"),
-                ClientId = Configuration["GoogleOAuth:ClientId"],
-                ClientSecret = Configuration["GoogleOAuth:ClientSecret"],
-                AutomaticAuthenticate = false,
-                AutomaticChallenge = false,
-                GetClaimsFromUserInfoEndpoint = false,
-                SaveTokens = true,
-                UseTokenLifetime = true,
-                BackchannelHttpHandler = app.ApplicationServices.GetService<HttpClientHandler>(),
-                Events = new OpenIdConnectEvents()
-                {
-                    OnTicketReceived = context => {
-                        context.Properties.IsPersistent = true;
-                        context.Properties.AllowRefresh = false;
-                        return Task.CompletedTask;
-                    }
-                }
-            };
-            openIdConnectOptions.Scope.Clear();
-            openIdConnectOptions.Scope.Add("openid");
-            openIdConnectOptions.Scope.Add("email");
-            app.UseOpenIdConnectAuthentication(openIdConnectOptions);
-
             app.UseMvc();
-
-            SampleData.InitializeAppDatabaseAsync(app.ApplicationServices).Wait();
 
             app.UseSwagger();
             app.UseSwaggerUi(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "AbcLeaves API V1");
             });
+
+            // todo: move to extensions
+            SampleData.InitializeAppDatabaseAsync(app.ApplicationServices).Wait();
         }
     }
 }

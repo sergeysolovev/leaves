@@ -1,43 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using AbcLeaves.Api.Helpers;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
-namespace ABC.Leaves.Api.Services
+namespace AbcLeaves.Api.Services
 {
     public class GoogleOAuthService : IGoogleOAuthService
     {
         private readonly GoogleOAuthOptions authOptions;
         private readonly HttpClient backchannel;
+        private readonly IBackChannelHelper backchannelHelper;
 
-        public GoogleOAuthService(IOptions<GoogleOAuthOptions> authOptionsAccessor,
-            HttpClientHandler httpBackchannelHandler)
+        public GoogleOAuthService(
+            IOptions<GoogleOAuthOptions> authOptionsAccessor,
+            HttpClientHandler httpBackchannelHandler,
+            IBackChannelHelper backchannelHelper)
         {
             this.authOptions = authOptionsAccessor.Value;
             this.backchannel = new HttpClient(httpBackchannelHandler);
+            this.backchannelHelper = backchannelHelper;
         }
 
-        public string BuildOfflineAccessChallengeUrl(string redirectUrl, string state)
-        {
-            return QueryHelpers.AddQueryString(
-                uri: authOptions.AuthUri,
-                queryString: new Dictionary<string, string> {
-                    ["response_type"] = "code",
-                    ["client_id"] = authOptions.ClientId,
-                    ["scope"] = String.Join(" ", authOptions.Scopes),
-                    ["redirect_uri"] = redirectUrl,
-                    ["access_type"] = "offline",
-                    ["prompt"] = "consent",
-                    ["include_granted_scopes"] = "true",
-                    ["state"] = state
-                });
-        }
-
-        public async Task<OAuthExchangeResult> ExchangeCode(string code, string redirectUrl)
+        public async Task<ExchangeAuthCodeResult> ExchangeAuthCode(string code, string redirectUrl)
         {
             var tokenRequestContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -52,21 +42,44 @@ namespace ABC.Leaves.Api.Services
             requestMessage.Content = tokenRequestContent;
             using (var response = await backchannel.SendAsync(requestMessage))
             {
+                var details = new Dictionary<string, object>();
+                var error = String.Empty;
                 if (response.IsSuccessStatusCode)
                 {
                     var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-                    return OAuthExchangeResult.Success(payload);
+                    var exchangeResponse = new OAuthExchangeResponse(payload);
+                    var idToken = exchangeResponse.IdToken;
+                    var accessToken = exchangeResponse.AccessToken;
+                    var refreshToken = exchangeResponse.RefreshToken;
+                    if (String.IsNullOrEmpty(idToken))
+                    {
+                        details.Add("id_token", "Failed to retrieve oauth id_token");
+                    }
+                    if (String.IsNullOrEmpty(accessToken))
+                    {
+                        details.Add("access_token", "Failed to retrieve oauth access_token");
+                    }
+                    if (String.IsNullOrEmpty(refreshToken))
+                    {
+                        details.Add("refresh_token", "Failed to retrieve oauth refresh_token");
+                    }
+                    if (details.Any())
+                    {
+                        error = "Failed to exchange oauth authorization code with tokens";
+                        return ExchangeAuthCodeResult.Fail(error, details);
+                    }
+                    return ExchangeAuthCodeResult.Success(idToken, accessToken, refreshToken);
                 }
                 else
                 {
-                    return OAuthExchangeResult.Fail("OAuth token endpoint failure: " +
-                        await DisplayHttpResponse(response)
-                    );
+                    error = "OAuth token endpoint failure, see details from more info";
+                    details = await backchannelHelper.GetResponseDetailsAsync(response);
+                    return ExchangeAuthCodeResult.Fail(error, details);
                 }
             }
         }
 
-        public async Task<OAuthExchangeResult> ExchangeRefreshToken(string refreshToken)
+        public async Task<ExchangeRefreshTokenResult> ExchangeRefreshToken(string refreshToken)
         {
             var tokenRequestContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -83,24 +96,28 @@ namespace ABC.Leaves.Api.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-                    return OAuthExchangeResult.Success(payload);
+                    var exchangeResponse = new OAuthExchangeResponse(payload);
+                    var accessToken = exchangeResponse.AccessToken;
+                    if (String.IsNullOrEmpty(accessToken))
+                    {
+                        return ExchangeRefreshTokenResult.Fail(
+                            "Failed to exchange the refresh token with an access token");
+                    }
+                    return ExchangeRefreshTokenResult.Success(accessToken);
                 }
                 else
                 {
-                    return OAuthExchangeResult.Fail("OAuth token endpoint failure: " +
-                        await DisplayHttpResponse(response)
-                    );
+                    var error = "OAuth token endpoint failure, see details from more info";
+                    var details = await backchannelHelper.GetResponseDetailsAsync(response);
+                    return ExchangeRefreshTokenResult.Fail(error, details);
                 }
             }
         }
 
-        private static async Task<string> DisplayHttpResponse(HttpResponseMessage response)
+        public async Task<VerifyAccessResult> ValidateRefreshTokenAsync(string refreshToken)
         {
-            var output = new System.Text.StringBuilder();
-            output.Append("Status: " + response.StatusCode + ";");
-            output.Append("Headers: " + response.Headers.ToString() + ";");
-            output.Append("Body: " + await response.Content.ReadAsStringAsync() + ";");
-            return output.ToString();
+            // todo: implement validation
+            return await Task.FromResult(VerifyAccessResult.Success);
         }
     }
 }

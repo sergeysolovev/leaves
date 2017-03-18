@@ -1,39 +1,48 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
-namespace ABC.Leaves.Api.Domain
+namespace AbcLeaves.Api.Domain
 {
-    public class LeaveApproveResult : IOperationResult
+    public class LeaveApproveResult : OperationResultBase, INotFoundOperationResult
     {
-        public static LeaveApproveResult Success(OperationResult shareResult)
+        [JsonIgnore]
+        public bool NotFound { get; protected set; }
+        public OperationResult ShareGoogleCalendarResult { get; private set; }
+
+        public LeaveApproveResult() : base()
         {
-            return new LeaveApproveResult {
-                Succeeded = true,
-                ShareGoogleCalendarResult = shareResult
-            };
         }
+
+        protected LeaveApproveResult(OperationResult shareResult)
+        {
+            if (shareResult == null)
+            {
+                throw new ArgumentNullException(nameof(shareResult));
+            }
+
+            ShareGoogleCalendarResult = shareResult;
+        }
+
+        protected LeaveApproveResult(string error)
+            : base(error, null)
+        {
+        }
+
+        protected LeaveApproveResult(IOperationResult result)
+            : base(result)
+        {
+        }
+
+        public static LeaveApproveResult Success(OperationResult shareResult)
+            => new LeaveApproveResult(shareResult);
+
+        public static LeaveApproveResult Fail(string error)
+            => new LeaveApproveResult(error);
 
         public static LeaveApproveResult FailNotFound(int leaveId)
         {
-            return new LeaveApproveResult {
-                NotFound = true,
-                ErrorMessage = $"Employee leave id={leaveId} is not found"
-            };
+            var error = $"Employee leave id={leaveId} is not found";
+            return new LeaveApproveResult(error) { NotFound = true };
         }
-
-        public static LeaveApproveResult Fail(string message)
-        {
-            return new LeaveApproveResult {
-                ErrorMessage = message
-            };
-        }
-
-        public bool Succeeded { get; protected set; }
-
-        public string ErrorMessage { get; protected set; }
-
-        public OperationResult ShareGoogleCalendarResult { get; protected set; }
-
-        [JsonIgnore]
-        public bool NotFound { get; protected set; }
     }
 }

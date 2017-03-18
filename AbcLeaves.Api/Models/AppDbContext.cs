@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ABC.Leaves.Api.Models
+namespace AbcLeaves.Api.Models
 {
     public class AppDbContext : IdentityDbContext<AppUser, IdentityRole, string>
     {

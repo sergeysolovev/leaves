@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 
-namespace ABC.Leaves.Api.Helpers
+namespace AbcLeaves.Api.Helpers
 {
     public class ModelStateHelper : IModelStateHelper
     {

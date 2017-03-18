@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class LeaveApplyDto
     {

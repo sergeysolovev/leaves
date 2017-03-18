@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ABC.Leaves.Api.Models
+namespace AbcLeaves.Api.Models
 {
     public static class SampleData
     {

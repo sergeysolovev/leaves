@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace ABC.Leaves.Api.Services
+namespace AbcLeaves.Api.Services
 {
     public interface IGoogleCalendarService
     {
-        Task<AddEventResult> AddEventAsync(string accessToken, DateTime start, DateTime end);
+        Task<OperationResult> AddEventAsync(CalendarEventAddDto eventAddDto);
     }
 }

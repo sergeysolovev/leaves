@@ -1,18 +1,23 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class Program
     {
-        public static string[] CommandLineArgs { get; private set;}
+        public static string[] Args;
 
         public static void Main(string[] args)
         {
-            CommandLineArgs = args;
-
+            Args = args;
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("hosting.json")
+                .Build();
             var host = new WebHostBuilder()
+                .UseConfiguration(configuration)
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()

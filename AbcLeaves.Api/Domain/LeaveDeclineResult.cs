@@ -1,35 +1,24 @@
 ﻿using Newtonsoft.Json;
 
-namespace ABC.Leaves.Api.Domain
+namespace AbcLeaves.Api.Domain
 {
-    public class LeaveDeclineResult : IOperationResult
+    public class LeaveDeclineResult : OperationResultBase, INotFoundOperationResult
     {
-        public static LeaveDeclineResult Success()
-        {
-            return new LeaveDeclineResult {
-                Succeeded = true
-            };
-        }
+        [JsonIgnore]
+        public bool NotFound { get; protected set; }
+
+        public LeaveDeclineResult() : base() {}
+        protected LeaveDeclineResult(string error) : base(error, null) {}
+        protected LeaveDeclineResult(IOperationResult result) : base(result) {}
+
+        public static LeaveDeclineResult Success => new LeaveDeclineResult();
+
+        public static LeaveDeclineResult Fail(string error) => new LeaveDeclineResult(error);
 
         public static LeaveDeclineResult FailNotFound(int leaveId)
         {
-            return new LeaveDeclineResult {
-                NotFound = true,
-                ErrorMessage = $"Employee leave id={leaveId} is not found"
-            };
+            var error = $"Employee leave id={leaveId} is not found";
+            return new LeaveDeclineResult(error) { NotFound = true };
         }
-
-        public static LeaveDeclineResult Fail(string message)
-        {
-            return new LeaveDeclineResult {
-                ErrorMessage = message
-            };
-        }
-
-        public bool Succeeded { get; protected set; }
-        public string ErrorMessage { get; protected set; }
-
-        [JsonIgnore]
-        public bool NotFound { get; protected set; }
     }
 }

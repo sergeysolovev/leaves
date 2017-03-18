@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Models;
 
-namespace ABC.Leaves.Api.Repositories
+namespace AbcLeaves.Api.Repositories
 {
     public interface ILeavesRepository
     {

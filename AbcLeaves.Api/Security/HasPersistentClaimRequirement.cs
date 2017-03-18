@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class HasPersistentClaimRequirement : IAuthorizationRequirement
     {

@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using ABC.Leaves.Api.Domain;
+using AbcLeaves.Api.Domain;
 using AutoMapper;
-using ABC.Leaves.Api.Helpers;
+using AbcLeaves.Api.Helpers;
 
-namespace ABC.Leaves.Api.Controllers
+namespace AbcLeaves.Api.Controllers
 {
     [Route("api/leaves")]
-    public class LeavesController : Controller
+    [Authorize(ActiveAuthenticationSchemes = "Bearer")]
+    public class LeavesController : ControllerBase
     {
         private readonly IUserManager userManager;
         private readonly ILeavesManager leavesManager;
-        private readonly IModelStateHelper modelStateHelper;
+        private readonly IModelStateHelper modelHelper;
         private readonly IMapper mapper;
 
         public LeavesController(IUserManager userManager,
@@ -22,75 +23,45 @@ namespace ABC.Leaves.Api.Controllers
         {
             this.userManager = userManager;
             this.leavesManager = leavesManager;
-            this.modelStateHelper = modelStateHelper;
+            this.modelHelper = modelStateHelper;
             this.mapper = mapper;
         }
 
         // POST api/leaves
         [HttpPost]
-        [Authorize(ActiveAuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> Post([FromBody]LeavePostDto leaveDto)
         {
-            LeaveApplyResult result;
-            if (!ModelState.IsValid)
-            {
-                result = LeaveApplyResult.Fail(
-                    errorMessage: "One or more errors occurred during validation",
-                    validationErrors: modelStateHelper.GetValidationErrors(ModelState));
-                return BadRequest(result);
-            }
-
-            var principal = HttpContext.User;
-            var userResult = await userManager.GetUserAsync(principal);
-            if (!userResult.Succeeded)
-            {
-                result = LeaveApplyResult.FailFrom(userResult);
-                return BadRequest(result);
-            }
-            var user = userResult.User;
-            var leaveApplyDto = mapper.Map<LeavePostDto, LeaveApplyDto>(
-                leaveDto, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id)
-            );
-            result = await leavesManager.ApplyAsync(leaveApplyDto);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            var result = await Operation<LeaveApplyResult>
+                .BeginWith(() => ModelState.IsValid ?
+                    ModelValidationResult.Success :
+                    ModelValidationResult.Fail(modelHelper.GetValidationErrors(ModelState)))
+                .ProceedWith(x => userManager.EnsureUserCreatedAsync(HttpContext.User))
+                .ProceedWith(userResult => {
+                    var user = userResult.User;
+                    var leaveApplyDto = mapper.Map<LeavePostDto, LeaveApplyDto>(
+                        leaveDto, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id));
+                    return leavesManager.ApplyAsync(leaveApplyDto);
+                })
+                .Return();
+            return FromOperationResult(result);
         }
 
         // PATCH api/leaves/{id}/approve
         [HttpPatchAttribute("{id}/approve")]
-        [Authorize(ActiveAuthenticationSchemes = "Bearer", Policy = "CanApproveLeaves")]
+        [Authorize(Policy = "CanApproveLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
         {
             var result = await leavesManager.ApproveAsync(id);
-            if (!result.Succeeded)
-            {
-                if (result.NotFound)
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return FromOperationResult(result);
         }
 
         // PATCH api/leaves/{id}/decline
         [HttpPatchAttribute("{id}/decline")]
-        [Authorize(ActiveAuthenticationSchemes = "Bearer", Policy = "CanApproveLeaves")]
+        [Authorize(Policy = "CanDeclineLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
         {
             var result = await leavesManager.DeclineAsync(id);
-            if (!result.Succeeded)
-            {
-                if (result.NotFound)
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return FromOperationResult(result);
         }
     }
 }

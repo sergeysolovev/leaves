@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace ABC.Leaves.Api
+namespace AbcLeaves.Api
 {
     public class LeavePostDto
     {

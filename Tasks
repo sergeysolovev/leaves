@@ -1,0 +1,5 @@
+(-) Refactor Client: make services and managers (helpers)
+(-) Logging
+(-) Activate HTTPS
+(-) API versioning
+(-) Implement refresh token validation

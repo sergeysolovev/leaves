@@ -2,65 +2,60 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using AutoMapper;
+using AbcLeaves.Api.Helpers;
 
-namespace ABC.Leaves.Api.Services
+namespace AbcLeaves.Api.Services
 {
     public class GoogleCalendarService : IGoogleCalendarService
     {
-        private readonly GoogleCalendarOptions calendarOptions;
-        private readonly HttpClient backchannel;
+        private const string EventsUri = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 
-        public GoogleCalendarService(IOptions<GoogleCalendarOptions> calendarOptionsAccessor,
+        private readonly IMapper mapper;
+        private readonly HttpClient backchannel;
+        private readonly IBackChannelHelper backchannelHelper;
+
+        public GoogleCalendarService(
+            IMapper mapper,
+            IBackChannelHelper backchannelHelper,
             HttpClientHandler httpBackchannelHandler)
         {
-            this.calendarOptions = calendarOptionsAccessor.Value;
+            this.mapper = mapper;
+            this.backchannelHelper = backchannelHelper;
             this.backchannel = new HttpClient(httpBackchannelHandler);
         }
 
-        public async Task<AddEventResult> AddEventAsync(string accessToken, DateTime start, DateTime end)
+        public async Task<OperationResult> AddEventAsync(CalendarEventAddDto eventDto)
         {
-            var calendarEvent = CreateEvent(start, end);
+            var accessToken = eventDto.AccessToken;
+            var calendarEvent = mapper.Map<CalendarEventAddDto, CalendarEvent>(eventDto);
             var calendarEventJson = JsonConvert.SerializeObject(calendarEvent,
                 new JsonSerializerSettings
                 {
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 });
-            var eventsUri = calendarOptions.EventsUri;
-            var request = new HttpRequestMessage(HttpMethod.Post, eventsUri);
+            var request = new HttpRequestMessage(HttpMethod.Post, EventsUri);
             request.Content = new StringContent(calendarEventJson, Encoding.UTF8, "application/json");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             using (var response = await backchannel.SendAsync(request))
             {
-                var result = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    return AddEventResult.Fail(
-                        "An error occured when adding event to the Google calendar. " +
-                        $"Google responsed '{result}' with status code '{(int)response.StatusCode}'"
-                    );
+                    var error = "An error occured when adding event to the Google calendar";
+                    var details = await backchannelHelper.GetResponseDetailsAsync(response);
+                    return OperationResult.Fail(error, details);
                 }
-                string eventUri = GetEventUriFromJson(result);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var eventUri = GetEventUriFromJson(responseContent);
                 if (String.IsNullOrEmpty(eventUri))
                 {
-                    // todo: log error
+                        // todo: log error
                 }
-                return AddEventResult.Success(eventUri);
+                return OperationResult.Success(eventUri);
             }
-        }
-
-        private CalendarEvent CreateEvent(DateTime start, DateTime end)
-        {
-            return new CalendarEvent
-            {
-                Start = new CalendarEventDateTime { DateTime = start },
-                End = new CalendarEventDateTime { DateTime = end },
-                Summary = calendarOptions.LeaveEventSummary,
-                Description = calendarOptions.LeaveEventDescription
-            };
         }
 
         private string GetEventUriFromJson(string json)

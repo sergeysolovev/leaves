@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-namespace ABC.Leaves.Api.Models
+namespace AbcLeaves.Api.Models
 {
     public class AppUser : IdentityUser
     {

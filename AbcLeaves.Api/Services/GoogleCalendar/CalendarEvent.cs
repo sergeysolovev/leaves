@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ABC.Leaves.Api.Services
+namespace AbcLeaves.Api.Services
 {
     public class CalendarEvent
     {

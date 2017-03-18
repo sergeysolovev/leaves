@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ABC.Leaves.Api.Models
+namespace AbcLeaves.Api.Models
 {
     public class Leave
     {

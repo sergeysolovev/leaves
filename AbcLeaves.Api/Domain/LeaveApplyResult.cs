@@ -1,52 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using ABC.Leaves.Api.Models;
+using AbcLeaves.Api.Models;
 using Newtonsoft.Json;
 
-namespace ABC.Leaves.Api.Domain
+namespace AbcLeaves.Api.Domain
 {
-    public class LeaveApplyResult : IOperationResult
+    public class LeaveApplyResult : OperationResultBase
     {
-        private LeaveApplyResult() {}
+        [JsonIgnore]
+        public Leave Leave { get; private set; }
+        public int? LeaveId => Leave?.Id;
 
-        public static LeaveApplyResult Success(Leave leave)
+        public LeaveApplyResult() : base()
+        {
+        }
+
+        protected LeaveApplyResult(Leave leave) : base(true)
         {
             if (leave == null)
             {
                 throw new ArgumentNullException(nameof(leave));
             }
-            return new LeaveApplyResult {
-                Succeeded = true,
-                Leave = leave
-            };
+            Leave = leave;
         }
 
-        public static LeaveApplyResult Fail(string errorMessage)
+        protected LeaveApplyResult(string error, Dictionary<string, object> details)
+            : base(error, details)
         {
-            return new LeaveApplyResult {
-                ErrorMessage = errorMessage
-            };
         }
 
-        public static LeaveApplyResult Fail(string errorMessage,
-            Dictionary<string, object> validationErrors)
+        protected LeaveApplyResult(IOperationResult result)
+            : base(result)
         {
-            return new LeaveApplyResult {
-                ErrorMessage = errorMessage,
-                ValidationErrors = validationErrors
-            };
         }
 
-        public static LeaveApplyResult FailFrom(IOperationResult fromResult)
-        {
-            return Fail(fromResult.ErrorMessage);
-        }
+        public static LeaveApplyResult Success(Leave leave) => new LeaveApplyResult(leave);
 
-        [JsonIgnore]
-        public Leave Leave { get; protected set; }
-        public int? LeaveId => Leave?.Id;
-        public Dictionary<string, object> ValidationErrors { get; protected set; }
-        public bool Succeeded { get; protected set; }
-        public string ErrorMessage { get; protected set; }
+        public static LeaveApplyResult Fail(string error, Dictionary<string, object> details)
+            => new LeaveApplyResult(error, details);
+
+        public static LeaveApplyResult FailFrom(IOperationResult result)
+            => new LeaveApplyResult(result);
     }
 }

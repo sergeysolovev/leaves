@@ -1,4 +1,4 @@
-﻿namespace ABC.Leaves.Api.Models
+﻿namespace AbcLeaves.Api.Models
 {
     public enum LeaveStatus
     {

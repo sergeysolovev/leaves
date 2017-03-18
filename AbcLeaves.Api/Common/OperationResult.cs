@@ -1,29 +1,34 @@
-﻿namespace ABC.Leaves.Api
+﻿using System.Collections.Generic;
+
+namespace AbcLeaves.Api
 {
-    public class OperationResult : IOperationResult
+    public class OperationResult : OperationResultBase
     {
-        public static OperationResult Success(object value)
+        public string Value { get; private set; }
+
+        public OperationResult() : base() {}
+        protected OperationResult(bool succeeded) : base(succeeded) {}
+        protected OperationResult(IOperationResult fromResult) : base(fromResult) {}
+
+        protected OperationResult(string value)
+            : base(true)
         {
-            return new OperationResult { Succeeded = true, Value = value };
+            Value = value;
         }
 
-        public static OperationResult Fail(string message)
+        protected OperationResult(string error, Dictionary<string, object> details)
+            : base(error, details)
         {
-            return new OperationResult { ErrorMessage = message };
         }
+
+        public static OperationResult Success() => new OperationResult(true);
+
+        public static OperationResult Success(string value) => new OperationResult(value);
+
+        public static OperationResult Fail(string error, Dictionary<string, object> details = null)
+            => new OperationResult(error, details);
 
         public static OperationResult FailFrom(IOperationResult fromResult)
-        {
-            return Fail(fromResult.ErrorMessage);
-        }
-
-        public T GetValue<T>()
-        {
-            return (T)Value;
-        }
-
-        public object Value { get; protected set; }
-        public bool Succeeded { get; protected set; }
-        public string ErrorMessage { get; protected set; }
+            => new OperationResult(fromResult);
     }
 }

@@ -58,7 +58,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             }
 
             // call api
-            var apiUrl = $"http://localhost:5000/api/leaves/{id}/approve";
+            var apiUrl = $"http://localhost:8080/api/leaves/{id}/approve";
             var apiRequest = new HttpRequestMessage(new HttpMethod("PATCH"), apiUrl);
             apiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
             using (var apiResponse = await backchannel.SendAsync(apiRequest))
@@ -90,7 +90,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             }
 
             // call api
-            var apiUrl = $"http://localhost:5000/api/leaves/{id}/decline";
+            var apiUrl = $"http://localhost:8080/api/leaves/{id}/decline";
             var apiRequest = new HttpRequestMessage(new HttpMethod("PATCH"), apiUrl);
             apiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
             using (var apiResponse = await backchannel.SendAsync(apiRequest))
@@ -125,7 +125,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             if (ensureGoogleApisAccess)
             {
                 // use api to check access
-                var apiUrl = "http://localhost:5000/api/user/googleapis/check-access";
+                var apiUrl = "http://localhost:8080/api/googleapis";
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
                 var accessGranted = false;
@@ -156,7 +156,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             // actually we don't need to send access_token, cz api will get
             // it on the backend side from refresh_token
 
-            var apiUrl1 = "http://localhost:5000/api/leaves";
+            var apiUrl1 = "http://localhost:8080/api/leaves";
             var request1 = new HttpRequestMessage(HttpMethod.Post, apiUrl1);
             request1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
             var leave = new {
@@ -176,41 +176,6 @@ namespace AbcLeaves.BasicMvcClient.Controllers
                 {
                     StatusCode = (int)response.StatusCode
                 };
-            }
-        }
-
-        // GET /mvcclient/register
-        [Authorize(ActiveAuthenticationSchemes = "GoogleOpenIdConnect")]
-        [HttpGet("register")]
-        public async Task<IActionResult> RegisterUser()
-        {
-            // get id_token
-            var authContext = new AuthenticateContext("GoogleOpenIdConnect");
-            await HttpContext.Authentication.AuthenticateAsync(authContext);
-            if (authContext.Principal == null || authContext.Properties == null)
-            {
-                throw new InvalidOperationException();
-            }
-            var authProperties = new AuthenticationProperties(authContext.Properties);
-            var idToken = authProperties.GetTokenValue("id_token");
-            if (String.IsNullOrEmpty(idToken))
-            {
-                return BadRequest();
-            }
-
-            // use api:
-            var apiUrl = "http://localhost:5000/api/user";
-            var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", idToken);
-            using (var apiResponse = await backchannel.SendAsync(request))
-            {
-                if (!apiResponse.IsSuccessStatusCode)
-                {
-                    ModelState.AddModelError("error",
-                        await apiResponse.Content.ReadAsStringAsync());
-                    return BadRequest(ModelState);
-                }
-                return Ok($"The user succesfully registered");
             }
         }
 
@@ -288,7 +253,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             // use the backchannel to call the API
             // (todo: move to a service)
             var apiUrl = QueryHelpers.AddQueryString(
-                uri: "http://localhost:5000/api/user/googleapis/grant-access",
+                uri: "http://localhost:8080/api/googleapis",
                 queryString: new Dictionary<string, string> {
                     ["code"] = code,
                     ["redirectUrl"] = Url.Action(null, null, null, Request.Scheme)
