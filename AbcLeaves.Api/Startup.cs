@@ -55,8 +55,9 @@ namespace AbcLeaves.Api
                         new HasPersistentClaimRequirement("DeclineLeaves", "Allowed")));
             });
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
-                optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
+                options.UseSqlite(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();

@@ -7,11 +7,11 @@ namespace AbcLeaves.Api.Domain
         [JsonIgnore]
         public bool NotFound { get; protected set; }
 
-        public LeaveDeclineResult() : base() {}
+        public LeaveDeclineResult(bool succeeded) : base(succeeded) {}
         protected LeaveDeclineResult(string error) : base(error, null) {}
         protected LeaveDeclineResult(IOperationResult result) : base(result) {}
 
-        public static LeaveDeclineResult Success => new LeaveDeclineResult();
+        public static LeaveDeclineResult Success => new LeaveDeclineResult(true);
 
         public static LeaveDeclineResult Fail(string error) => new LeaveDeclineResult(error);
 

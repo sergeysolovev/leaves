@@ -21,6 +21,7 @@
       "version": "1.1.0",
       "type": "platform"
     },
+    "AbcLeaves.Core": "1.0.0-*",
     "Swashbuckle.AspNetCore": "1.0.0-rc1"
   },
   "tools": {

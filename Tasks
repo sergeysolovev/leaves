@@ -1,3 +1,4 @@
+(-) Move Operations to separate assembly to use in Client
 (-) Refactor Client: make services and managers (helpers)
 (-) Logging
 (-) Activate HTTPS

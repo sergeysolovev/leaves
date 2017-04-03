@@ -5,10 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
-using AbcLeaves.BasicMvcClient.Helpers;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
+using AbcLeaves.Core.Helpers;
+using AbcLeaves.BasicMvcClient.Domain;
+using Newtonsoft.Json;
+using AbcLeaves.Core;
 
 namespace AbcLeaves.BasicMvcClient
 {
@@ -28,12 +31,37 @@ namespace AbcLeaves.BasicMvcClient
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services
+                .AddMvc()
+                .AddJsonOptions(options => {
+                    options.SerializerSettings.DateParseHandling = DateParseHandling.DateTimeOffset;
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.Formatting = Formatting.Indented;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                });
+
             services.AddOptions();
-            services.Configure<Helpers.GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
+            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddSingleton<HttpClientHandler>();
-            services.AddTransient<IGoogleOAuthHelper, GoogleOAuthHelper>();
+            services.AddTransient<IGoogleApisAuthManager, GoogleApisAuthManager>();
+            services.AddTransient<IMvcActionResultHelper, MvcActionResultHelper>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IAuthenticationManager, AuthenticationManager>();
+
+            // todo: implement google calendar and oauth as api clients
+            // and try to register 2 clients
+
+            // todo: make Core.Abstractions assembly
+
+            // todo: make Core.Web assembly with implementations
+
+            // todo: change names of googleapis controller (client + server)
+
+            services.AddBackchannel<HttpClientHandler>();
+            services
+                .AddHttpApiClient<LeavesApiClient, LeavesApiClientFactory>(
+                    Configuration.GetSection("LeavesApi"))
+                .AddBearerTokenIdentification<HttpContextBearerTokenProvider>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -60,7 +88,7 @@ namespace AbcLeaves.BasicMvcClient
                 GetClaimsFromUserInfoEndpoint = false,
                 SaveTokens = true,
                 UseTokenLifetime = true,
-                BackchannelHttpHandler = app.ApplicationServices.GetService<HttpClientHandler>(),
+                BackchannelHttpHandler = app.ApplicationServices.GetService<HttpMessageHandler>(),
                 Events = new OpenIdConnectEvents()
                 {
                     OnTicketReceived = context => {

@@ -13,13 +13,12 @@ namespace AbcLeaves.Api.Domain
         {
         }
 
-        protected LeaveApproveResult(OperationResult shareResult)
+        protected LeaveApproveResult(OperationResult shareResult) : base(true)
         {
             if (shareResult == null)
             {
                 throw new ArgumentNullException(nameof(shareResult));
             }
-
             ShareGoogleCalendarResult = shareResult;
         }
 
