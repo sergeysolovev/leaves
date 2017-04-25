@@ -11,12 +11,12 @@ namespace AbcLeaves.BasicMvcClient.Domain
     {
         private readonly GoogleOAuthOptions options;
         private readonly IAuthenticationManager authHelper;
-        private readonly ILeavesApiClient leavesApiClient;
+        private readonly LeavesApiClient leavesApiClient;
 
         public GoogleApisAuthManager(
             IOptions<GoogleOAuthOptions> optionsAccessor,
             IAuthenticationManager authHelper,
-            ILeavesApiClient leavesApiClient)
+            LeavesApiClient leavesApiClient)
         {
             if (optionsAccessor == null)
             {
@@ -39,7 +39,7 @@ namespace AbcLeaves.BasicMvcClient.Domain
             string redirectUrl,
             string returnUrl)
         {
-            return await Operation<ReturnUrlResult>
+            return await OperationFlow<ReturnUrlResult>
                 .BeginWith(() => authHelper.GetAuthenticationPropertiesAsync())
                 .ProceedWith(getAuthProps => {
                     getAuthProps.AuthProperties.Items.Add("returnUrl", returnUrl ?? "/");
@@ -68,7 +68,7 @@ namespace AbcLeaves.BasicMvcClient.Domain
             {
                 return ReturnUrlResult.Fail($"{nameof(state)} parameter is required");
             }
-            return await Operation<ReturnUrlResult>
+            return await OperationFlow<ReturnUrlResult>
                 .BeginWith(() => authHelper.TestCrossSiteRequestForgery(state))
                 .ProceedWithClosure(testCsrf => testCsrf
                     .ProceedWith(x => leavesApiClient.GrantGoogleApisAccess(code, redirectUrl))

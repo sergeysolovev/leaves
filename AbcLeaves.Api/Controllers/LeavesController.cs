@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using AbcLeaves.Api.Domain;
 using AutoMapper;
 using AbcLeaves.Api.Helpers;
+using AbcLeaves.Core;
 
 namespace AbcLeaves.Api.Controllers
 {
@@ -31,7 +32,7 @@ namespace AbcLeaves.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]LeavePostDto leaveDto)
         {
-            var result = await Operation<LeaveApplyResult>
+            var result = await OperationFlow<LeaveApplyResult>
                 .BeginWith(() => ModelState.IsValid ?
                     ModelValidationResult.Success :
                     ModelValidationResult.Fail(modelHelper.GetValidationErrors(ModelState)))

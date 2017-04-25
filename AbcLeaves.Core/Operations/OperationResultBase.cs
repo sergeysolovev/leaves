@@ -1,26 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AbcLeaves.Core
 {
-    public class OperationResultBase : IOperationResult
+    public abstract class OperationResultBase : OperationResultBase<DefaultOperationContext>
     {
+        protected static DefaultOperationContext defaultContext => new DefaultOperationContext();
+
+        public OperationResultBase() : base()
+        {
+        }
+
+        public OperationResultBase(DefaultOperationContext context) : base(context)
+        {
+        }
+
+        protected OperationResultBase(bool succeeded) : base(defaultContext, succeeded)
+        {
+        }
+
+        protected OperationResultBase(IOperationResult result) : base(result)
+        {
+        }
+
+        protected OperationResultBase(string error, Dictionary<string, object> details)
+            : base(defaultContext, error, details)
+        {
+        }
+    }
+
+    public abstract class OperationResultBase<TContext> : IOperationResult<TContext>
+        where TContext : IOperationContext, new()
+    {
+        public TContext Context { get; set; }
         public bool Succeeded { get; protected set; }
         public string ErrorMessage { get; protected set; }
         public Dictionary<string, object> Details { get; protected set; } = new Dictionary<string, object>();
 
-        public OperationResultBase()
+        public void Succeed(TContext context)
+        {
+            Succeeded = true;
+            Context = context;
+        }
+
+        public OperationResultBase() : this(new TContext(), default(bool))
         {
         }
 
-        protected OperationResultBase(bool succeeded)
+        public OperationResultBase(TContext context) : this(context, default(bool))
         {
+        }
+
+        protected OperationResultBase(TContext context, bool succeeded)
+        {
+            SetContext(context);
             Succeeded = succeeded;
         }
 
-        protected OperationResultBase(string error, Dictionary<string, object> details)
+        protected OperationResultBase(
+            TContext context,
+            string error,
+            Dictionary<string, object> details)
         {
+            SetContext(context);
             ErrorMessage = error;
             if (details != null)
             {
@@ -33,17 +75,18 @@ namespace AbcLeaves.Core
             FailFromInternal(result);
         }
 
+        // todo: implement fail from passing context
+
         void IOperationResult.FailFrom(IOperationResult result)
         {
             FailFromInternal(result);
         }
 
-        protected void FailFromInternal(IOperationResult result)
+        protected virtual void FailFromInternal(IOperationResult result)
         {
             if (result.Succeeded)
             {
-                throw new InvalidOperationException(
-                    "Can not fail from successful result");
+                throw new InvalidOperationException();
             }
             ErrorMessage = result.ErrorMessage;
             if (result.Details != null)
@@ -52,9 +95,13 @@ namespace AbcLeaves.Core
             }
         }
 
-        protected void MergeDetailsWith(Dictionary<string, object> moreDetails)
+        private void SetContext(TContext context)
         {
-            moreDetails.ToList().ForEach(x => Details[x.Key] = x.Value);
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            Context = context;
         }
     }
 }

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "AbcLeaves.Core": "1.0.0-*",
     "AutoMapper": "5.2.0",
     "AutoMapper.Extensions.Microsoft.DependencyInjection": "1.2.0",
     "Microsoft.AspNetCore.Authentication.Google": "1.1.0",

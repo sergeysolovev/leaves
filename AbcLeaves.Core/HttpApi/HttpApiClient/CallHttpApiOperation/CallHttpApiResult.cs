@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace AbcLeaves.Core
 {
-    public class CallHttpApiResult : OperationResultBase
+    public sealed class CallHttpApiResult : OperationResultBase, ICallHttpApiResult
     {
         public const string DefaultError = "An error occurred when calling API.";
 
@@ -11,16 +11,15 @@ namespace AbcLeaves.Core
         [JsonIgnore] public CallHttpApiRequestDetails ApiRequestDetails { get; private set; }
 
         public CallHttpApiResult() : base() {}
-        protected CallHttpApiResult(bool succeeded) : base(succeeded) {}
-        protected CallHttpApiResult(IOperationResult fromResult) : base(fromResult) {}
+        private CallHttpApiResult(bool succeeded) : base(succeeded)
+        {
+        }
 
         private Func<string, string> keyRequest = apiName => $"{apiName}Request";
         private Func<string, string> keyResponse = apiName => $"{apiName}Response";
 
-        protected CallHttpApiResult(
-            CallHttpApiRequestDetails requestDetails,
-            string error,
-            string apiName) : base(error, null)
+        private CallHttpApiResult(CallHttpApiRequestDetails requestDetails, string error, string apiName)
+            : base(error, null)
         {
             if (requestDetails == null)
             {
@@ -30,10 +29,8 @@ namespace AbcLeaves.Core
             Details.Add(keyRequest(apiName), requestDetails.ToDictionary());
         }
 
-        protected CallHttpApiResult(
-            CallHttpApiRequestDetails requestDetails,
-            CallHttpApiResponseDetails responseDetails,
-            string apiName) : base()
+        private CallHttpApiResult(CallHttpApiRequestDetails requestDetails, CallHttpApiResponseDetails responseDetails, string apiName)
+            : base()
         {
             if (responseDetails == null)
             {
@@ -62,8 +59,5 @@ namespace AbcLeaves.Core
             CallHttpApiResponseDetails responseDetails,
             string apiName)
             => new CallHttpApiResult(requestDetails, responseDetails, apiName);
-
-        public static CallHttpApiResult FailFrom(IOperationResult fromResult)
-            => new CallHttpApiResult(fromResult);
     }
 }

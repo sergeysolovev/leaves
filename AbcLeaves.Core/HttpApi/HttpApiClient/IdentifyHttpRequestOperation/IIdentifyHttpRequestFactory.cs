@@ -2,7 +2,6 @@
 {
     public interface IIdentifyHttpRequestFactory
     {
-        HttpApiAuthType AuthType { get; }
-        IIdentifyHttpRequestOperation Create();
+        IIdentifyHttpRequest Create();
     }
 }

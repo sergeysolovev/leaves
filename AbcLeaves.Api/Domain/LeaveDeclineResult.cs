@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using AbcLeaves.Core;
+using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain
 {

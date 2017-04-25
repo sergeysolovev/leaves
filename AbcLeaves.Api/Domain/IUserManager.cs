@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Models;
+using AbcLeaves.Core;
 
 namespace AbcLeaves.Api.Domain
 {

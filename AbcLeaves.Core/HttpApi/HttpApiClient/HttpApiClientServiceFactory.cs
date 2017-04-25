@@ -16,9 +16,9 @@ namespace AbcLeaves.Core
             this.callApiBuilderFactory = callApiBuilderFactory;
         }
 
-        public IHttpApiClientService Create(IHttpApiOptions apiOptions)
+        public IHttpApiClientService Create(ICallHttpApiOptions options)
         {
-            return HttpApiClientService.Create(callApiBuilderFactory, apiOptions);
+            return HttpApiClientService.Create(options, callApiBuilderFactory);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace AbcLeaves.BasicMvcClient.Domain
 
         public async Task<AuthTokenResult> GetIdTokenAsync()
         {
-            return await Operation<AuthTokenResult>
+            return await OperationFlow<AuthTokenResult>
                 .BeginWith(() => GetAuthenticationPropertiesAsync())
                 .ProceedWith(getProps => {
                     var idToken = getProps.AuthProperties.GetTokenValue("id_token");
@@ -62,7 +62,7 @@ namespace AbcLeaves.BasicMvcClient.Domain
 
         public async Task<AuthPropertiesResult> TestCrossSiteRequestForgery(string state)
         {
-            return await Operation<AuthPropertiesResult>
+            return await OperationFlow<AuthPropertiesResult>
                 .BeginWith(() => UnprotectState(state))
                 .ProceedWithClosure(unprotect => unprotect
                     .ProceedWith(x => GetIdTokenFromState(unprotect.Current.AuthProperties))

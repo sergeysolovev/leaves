@@ -1,54 +1,45 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AbcLeaves.Core
 {
-    public class HttpApiClientBuilder : IHttpApiClientBuilder
+    public class HttpApiClientBuilder<TClient> : IHttpApiClientBuilder
+        where TClient : class
     {
-        private Action<IHttpApiOptions> configureOptions;
         public IServiceCollection Services { get; private set; }
 
-        private HttpApiClientBuilder(IServiceCollection services)
+        public HttpApiClientBuilder(IServiceCollection services)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
+
             Services = services;
+        }
+
+        public IHttpApiClientBuilder UseBackchannel(IHttpBackchannel backchannel)
+        {
+            return Configure(opts => opts.Backchannel = backchannel);
         }
 
         public IHttpApiClientBuilder AddBearerTokenIdentification<TBearerTokenProvider>()
             where TBearerTokenProvider : class, IBearerTokenProvider
         {
-            Services.AddSingleton<IBearerTokenProvider, TBearerTokenProvider>();
-            Services.AddSingleton<IdentifyHttpRequestBearerFactory>();
+            Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            Services.TryAddScoped<IBearerTokenProvider, TBearerTokenProvider>();
+            Services.TryAddEnumerable(ServiceDescriptor
+                .Scoped<IIdentifyHttpRequest, IdentifyHttpRequestBearer>());
             return this;
         }
 
-        public IHttpApiClientBuilder UseBackchannel<THttpBackchannel>()
-            where THttpBackchannel : class, IHttpBackchannel
+        private HttpApiClientBuilder<TClient> Configure(
+            Action<HttpApiClientOptions<TClient>> configureAction)
         {
-            var serviceProvider = Services.BuildServiceProvider();
-            var backchannel = serviceProvider.GetRequiredService<THttpBackchannel>();
-            return ConfigureOptions(opts => opts.Backchannel = backchannel);
-        }
-
-        public IHttpApiClientBuilder ConfigureOptions(
-            Action<IHttpApiOptions> configureOptions)
-        {
-            this.configureOptions += configureOptions;
+            Services.Configure(configureAction);
             return this;
-        }
-
-        public IHttpApiClientBuilder Configure(IHttpApiOptions options)
-        {
-            configureOptions.Invoke(options);
-            return this;
-        }
-
-        public static HttpApiClientBuilder Create(IServiceCollection services)
-        {
-            return new HttpApiClientBuilder(services);
         }
     }
 }

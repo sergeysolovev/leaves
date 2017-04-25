@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Services;
+using AbcLeaves.Core;
 using AutoMapper;
 
 namespace AbcLeaves.Api.Domain
@@ -10,13 +11,13 @@ namespace AbcLeaves.Api.Domain
         private readonly IMapper mapper;
         private readonly IUserManager userManager;
         private readonly IGoogleOAuthService googleAuthService;
-        private readonly IGoogleCalendarService googleCalendarService;
+        private readonly GoogleCalendarApiClient googleCalendarApiClient;
 
         public GoogleCalendarManager(
             IMapper mapper,
             IUserManager userManager,
             IGoogleOAuthService googleAuthService,
-            IGoogleCalendarService googleCalendarService)
+            GoogleCalendarApiClient googleCalendarApiClient)
         {
             if (mapper == null)
             {
@@ -30,15 +31,15 @@ namespace AbcLeaves.Api.Domain
             {
                 throw new ArgumentNullException(nameof(googleAuthService));
             }
-            if (googleCalendarService == null)
+            if (googleCalendarApiClient == null)
             {
-                throw new ArgumentNullException(nameof(googleCalendarService));
+                throw new ArgumentNullException(nameof(googleCalendarApiClient));
             }
 
             this.mapper = mapper;
             this.userManager = userManager;
             this.googleAuthService = googleAuthService;
-            this.googleCalendarService = googleCalendarService;
+            this.googleCalendarApiClient = googleCalendarApiClient;
         }
 
         public async Task<OperationResult> PublishUserEventAsync(UserEventPublishDto userEvent)
@@ -57,14 +58,12 @@ namespace AbcLeaves.Api.Domain
                 return OperationResult.FailFrom(userResult);
             }
             var user = userResult.User;
-
             var tokenResult = await userManager.GetRefreshTokenAsync(user);
             if (!tokenResult.Succeeded)
             {
                 return OperationResult.FailFrom(tokenResult);
             }
             var refreshToken = tokenResult.Value;
-
             var exchangeResult = await googleAuthService.ExchangeRefreshToken(refreshToken);
             if (!exchangeResult.Succeeded)
             {
@@ -75,7 +74,7 @@ namespace AbcLeaves.Api.Domain
             var eventAddDto = mapper.Map<UserEventPublishDto, CalendarEventAddDto>(
                 userEvent,
                 opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken));
-            var eventAddResult = await googleCalendarService.AddEventAsync(eventAddDto);
+            var eventAddResult = await googleCalendarApiClient.AddEventAsync(eventAddDto);
             if (!eventAddResult.Succeeded)
             {
                 return OperationResult.FailFrom(eventAddResult);

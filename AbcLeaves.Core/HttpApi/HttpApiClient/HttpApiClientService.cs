@@ -1,50 +1,44 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace AbcLeaves.Core
 {
     public class HttpApiClientService : IHttpApiClientService
     {
-        private readonly ICallHttpApiBuilderFactory callApiBuilderFactory;
-        private readonly IHttpApiOptions apiOptions;
-        private readonly HttpMethod httpPatch = new HttpMethod("PATCH");
+        private readonly ICallHttpApiOptions options;
+        private readonly ICallHttpApiBuilderFactory builderFactory;
 
         public static HttpApiClientService Create(
-            ICallHttpApiBuilderFactory callApiBuilderFactory,
-            IHttpApiOptions apiOptions)
+            ICallHttpApiOptions options,
+            ICallHttpApiBuilderFactory builderFactory)
         {
-            return new HttpApiClientService(callApiBuilderFactory, apiOptions);
+            return new HttpApiClientService(options, builderFactory);
         }
 
-        private HttpApiClientService(
-            ICallHttpApiBuilderFactory callApiBuilderFactory,
-            IHttpApiOptions apiOptions)
+        public HttpApiClientService(
+            ICallHttpApiOptions apiOptions,
+            ICallHttpApiBuilderFactory builderFactory)
         {
-            if (callApiBuilderFactory == null)
-            {
-                throw new ArgumentNullException(nameof(callApiBuilderFactory));
-            }
             if (apiOptions == null)
             {
                 throw new ArgumentNullException(nameof(apiOptions));
             }
+            if (builderFactory == null)
+            {
+                throw new ArgumentNullException(nameof(builderFactory));
+            }
 
-            this.callApiBuilderFactory = callApiBuilderFactory;
-            this.apiOptions = apiOptions;
-        }
-
-        protected virtual ICallHttpApiBuilder CreateCallHttpApiBuilder()
-        {
-            return callApiBuilderFactory.Create(apiOptions);
+            this.options = apiOptions;
+            this.builderFactory = builderFactory;
         }
 
         public async Task<CallHttpApiResult> CallAsync(HttpMethod method, string url,
             Action<ICallHttpApiRequestBuilder> builderAction = null)
         {
-            var builder = CreateCallHttpApiBuilder();
-            builderAction = builderAction ?? (x => {});
-            builderAction.Invoke(builder);
+            var builder = builderFactory.Create(options);
+            builderAction?.Invoke(builder);
             var operation = builder
                 .CompleteRequest(method, url)
                 .Build();
@@ -78,7 +72,7 @@ namespace AbcLeaves.Core
         public async Task<CallHttpApiResult> PatchAsync(string url,
             Action<ICallHttpApiRequestBuilder> builderAction = null)
         {
-            return await CallAsync(httpPatch, url, builderAction);
+            return await CallAsync(new HttpMethod(HttpMethods.Patch), url, builderAction);
         }
     }
 }

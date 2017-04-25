@@ -2,6 +2,6 @@
 {
     public interface ICallHttpApiBuilderFactory
     {
-        ICallHttpApiBuilder Create(IHttpApiOptions apiOptions);
+        ICallHttpApiBuilder Create(ICallHttpApiOptions apiOptions);
     }
 }

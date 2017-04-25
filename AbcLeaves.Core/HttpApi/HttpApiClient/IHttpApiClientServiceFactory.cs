@@ -2,6 +2,6 @@
 {
     public interface IHttpApiClientServiceFactory
     {
-        IHttpApiClientService Create(IHttpApiOptions apiOptions);
+        IHttpApiClientService Create(ICallHttpApiOptions apiOptions);
     }
 }

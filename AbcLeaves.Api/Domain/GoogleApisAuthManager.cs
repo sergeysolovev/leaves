@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Services;
+using AbcLeaves.Core;
 
 namespace AbcLeaves.Api.Domain
 {
@@ -30,7 +31,7 @@ namespace AbcLeaves.Api.Domain
 
         public async Task<VerifyAccessResult> VerifyAccess(ClaimsPrincipal principal)
         {
-            return await Operation<VerifyAccessResult>
+            return await OperationFlow<VerifyAccessResult>
                 .BeginWith(() => userManager.EnsureUserCreatedAsync(principal))
                 .ExitOnFailWith(user => VerifyAccessResult.FailFrom(user))
                 .ProceedWith(user => userManager.GetRefreshTokenAsync(user.User))
@@ -44,19 +45,17 @@ namespace AbcLeaves.Api.Domain
             string redirectUrl,
             ClaimsPrincipal principal)
         {
-            return await Operation<VerifyAccessResult>
-                .BeginWith(() => userManager.GetSubjectClaim(principal))
-                .ProceedWithClosure(subject => subject
-                    .ProceedWith(x => userManager.EnsureUserCreatedAsync(principal))
-                    .ProceedWithClosure(user => user
-                        .ProceedWith(x => googleAuthService.ExchangeAuthCode(code, redirectUrl))
-                        .ProceedWithClosure(exchange => exchange
-                            .ProceedWith(x => VerifyOAuthExchangeIdentity(
-                                principal: principal,
-                                idToken: exchange.Current.Tokens.IdToken))
-                            .ProceedWith(x => userManager.SaveRefreshTokenAsync(
-                                user: user.Current.User,
-                                token: exchange.Current.Tokens.RefreshToken)))))
+            return await OperationFlow<VerifyAccessResult>
+                .BeginWith(() => userManager.EnsureUserCreatedAsync(principal))
+                .ProceedWithClosure(user => user
+                    .ProceedWith(x => googleAuthService.ExchangeAuthCode(code, redirectUrl))
+                    .ProceedWithClosure(exchange => exchange
+                        .ProceedWith(x => VerifyOAuthExchangeIdentity(
+                            principal: principal,
+                            idToken: exchange.Current.Tokens.IdToken))
+                        .ProceedWith(x => userManager.SaveRefreshTokenAsync(
+                            user: user.Current.User,
+                            token: exchange.Current.Tokens.RefreshToken))))
                 .EndWith(VerifyAccessResult.Success)
                 .Return();
         }
@@ -66,7 +65,7 @@ namespace AbcLeaves.Api.Domain
             string idToken)
         {
             var error = "Authorization code doesn't match the authenticated identity";
-            return await Operation<OperationResult>
+            return await OperationFlow<OperationResult>
                 .BeginWith(() => userManager.GetSubjectClaim(principal))
                 .ProceedWithClosure(subject => subject
                     .ProceedWith(x => GetJwtSubject(idToken))

@@ -39,7 +39,6 @@ namespace AbcLeaves.BasicMvcClient
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
-
             services.AddOptions();
             services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -47,20 +46,9 @@ namespace AbcLeaves.BasicMvcClient
             services.AddTransient<IMvcActionResultHelper, MvcActionResultHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IAuthenticationManager, AuthenticationManager>();
-
-            // todo: implement google calendar and oauth as api clients
-            // and try to register 2 clients
-
-            // todo: make Core.Abstractions assembly
-
-            // todo: make Core.Web assembly with implementations
-
-            // todo: change names of googleapis controller (client + server)
-
             services.AddBackchannel<HttpClientHandler>();
             services
-                .AddHttpApiClient<LeavesApiClient, LeavesApiClientFactory>(
-                    Configuration.GetSection("LeavesApi"))
+                .AddHttpApiClient<LeavesApiClient>(Configuration.GetSection("LeavesApi"))
                 .AddBearerTokenIdentification<HttpContextBearerTokenProvider>();
         }
 
@@ -69,7 +57,6 @@ namespace AbcLeaves.BasicMvcClient
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            // Authentication:
             app.UseCookieAuthentication(new CookieAuthenticationOptions {
                 AuthenticationScheme = "GoogleOpenIdConnectCookies",
                 AutomaticAuthenticate = false,
@@ -88,7 +75,7 @@ namespace AbcLeaves.BasicMvcClient
                 GetClaimsFromUserInfoEndpoint = false,
                 SaveTokens = true,
                 UseTokenLifetime = true,
-                BackchannelHttpHandler = app.ApplicationServices.GetService<HttpMessageHandler>(),
+                //BackchannelHttpHandler = app.ApplicationServices.GetBackchannelHttpHandler(),
                 Events = new OpenIdConnectEvents()
                 {
                     OnTicketReceived = context => {
@@ -102,7 +89,6 @@ namespace AbcLeaves.BasicMvcClient
             openIdConnectOptions.Scope.Add("openid");
             openIdConnectOptions.Scope.Add("email");
             app.UseOpenIdConnectAuthentication(openIdConnectOptions);
-
             app.UseMvc();
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace AbcLeaves.Api.Repositories
 {

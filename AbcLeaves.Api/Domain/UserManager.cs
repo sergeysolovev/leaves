@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Models;
+using AbcLeaves.Core;
 using Microsoft.AspNetCore.Identity;
 
 namespace AbcLeaves.Api.Domain
@@ -137,7 +138,7 @@ namespace AbcLeaves.Api.Domain
 
         public async Task<UserResult> EnsureUserCreatedAsync(ClaimsPrincipal principal)
         {
-            return await Operation<UserResult>
+            return await OperationFlow<UserResult>
                 .BeginWith(() => AddUserAsync(principal))
                 .ProceedWith(addUser => UserResult.Success(addUser.User))
                 .Return();

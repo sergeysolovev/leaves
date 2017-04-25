@@ -2,38 +2,36 @@
 using Newtonsoft.Json;
 using System.Net;
 using System;
+using Microsoft.Extensions.Options;
 
 namespace AbcLeaves.Core
 {
-    public class LeavesApiClient : ILeavesApiClient
+    public class LeavesApiClient
     {
         private const string ErrorMessage = "An error occurred when requesting Abc Leaves API";
         private readonly IHttpApiClientService clientService;
 
-        public static LeavesApiClient Create(
-            IHttpApiClientServiceFactory apiClientServiceFactory,
-            IHttpApiOptions apiOptions)
+        public LeavesApiClient(
+            IOptions<HttpApiClientOptions<LeavesApiClient>> options,
+            IHttpApiClientServiceFactory clientFactory)
         {
-            return new LeavesApiClient(apiClientServiceFactory, apiOptions);
-        }
-
-        private LeavesApiClient(
-            IHttpApiClientServiceFactory apiClientServiceFactory,
-            IHttpApiOptions apiOptions)
-        {
-            if (apiOptions == null)
+            if (options == null)
             {
-                throw new ArgumentNullException(nameof(apiOptions));
+                throw new ArgumentNullException(nameof(options));
             }
-            if (apiClientServiceFactory == null)
+            if (options.Value == null)
             {
-                throw new ArgumentNullException(nameof(apiClientServiceFactory));
+                throw new ArgumentNullException(nameof(options.Value));
+            }
+            if (clientFactory == null)
+            {
+                throw new ArgumentNullException(nameof(clientFactory));
             }
 
-            this.clientService = apiClientServiceFactory.Create(apiOptions);
+            this.clientService = clientFactory.Create(options.Value);
         }
 
-        public async Task<CallHttpApiResult> ApplyLeaveAsync(CreateLeaveContract leave)
+        public async Task<ICallHttpApiResult> ApplyLeaveAsync(CreateLeaveContract leave)
         {
             // todo: why it's not clear from CreateLeaveDto
             // that we need to use DateTimeZoneHandling.Utc?
@@ -44,19 +42,19 @@ namespace AbcLeaves.Core
                 .UseRequestContent(() => new JsonContent(leaveJson)));
         }
 
-        public async Task<CallHttpApiResult> ApproveLeaveAsync(string id)
+        public async Task<ICallHttpApiResult> ApproveLeaveAsync(string id)
         {
             return await clientService.PatchAsync($"leaves/{id}/approve");
         }
 
-        public async Task<CallHttpApiResult> DeclineLeaveAsync(string id)
+        public async Task<ICallHttpApiResult> DeclineLeaveAsync(string id)
         {
             return await clientService.PatchAsync($"leaves/{id}/decline");
         }
 
         public async Task<VerifyAccessResult> VerifyGoogleApisAccess()
         {
-            return await Operation<VerifyAccessResult>
+            return await OperationFlow<VerifyAccessResult>
                 .BeginWith(() => clientService.GetAsync("googleapis"))
                 .ExitOnFailWith(callApi => {
                     var response = callApi.ApiResponseDetails;

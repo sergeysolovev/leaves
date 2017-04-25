@@ -38,6 +38,7 @@ namespace AbcLeaves.Api
         {
             services.AddOptions();
             services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
+
             services.AddRouting(options => options.LowercaseUrls = true);
             services
                 .AddMvc()
@@ -60,24 +61,34 @@ namespace AbcLeaves.Api
                     optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders(); // todo: consider removing def providers
             services.Configure<IdentityOptions>(options => {
                 options.Cookies.ApplicationCookie.AutomaticAuthenticate = false;
                 options.Cookies.ApplicationCookie.AutomaticChallenge = true;
             });
             services.AddAutoMapper();
-            services.AddSingleton<HttpClientHandler>();
+
             services.AddSingleton<IConfiguration>(Configuration);
+
             services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
             services.AddTransient<IModelStateHelper, ModelStateHelper>();
-            services.AddTransient<IBackChannelHelper, BackChannelHelper>();
+
             services.AddTransient<IGoogleOAuthService, GoogleOAuthService>();
-            services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
+            services.AddTransient<IBackChannelHelper, BackChannelHelper>();
+
+            //services.AddSingleton<HttpClientHandler>();
+            //services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
+
             services.AddTransient<ILeavesRepository, LeavesRepository>();
             services.AddTransient<IUserManager, UserManager>();
             services.AddTransient<ILeavesManager, LeavesManager>();
             services.AddTransient<IGoogleCalendarManager, GoogleCalendarManager>();
             services.AddTransient<IGoogleApisAuthManager, GoogleApisAuthManager>();
+
+            services.AddBackchannel<HttpClientHandler>();
+
+            services.AddHttpApiClient<GoogleCalendarApiClient>(
+                Configuration.GetSection("GoogleCalendarApi"));
 
             services.AddSwaggerGen(options =>
             {
@@ -103,7 +114,7 @@ namespace AbcLeaves.Api
                 TokenValidationParameters = new TokenValidationParameters {
                     ValidateIssuerSigningKey = true
                 },
-                BackchannelHttpHandler = app.ApplicationServices.GetService<HttpClientHandler>()
+                BackchannelHttpHandler = app.ApplicationServices.GetBackchannelHttpHandler()
             });
 
             app.UseMvc();
