@@ -1,8 +1,0 @@
-{
-  // "sdk" section is skipped so the latest version of sdk is in use
-  "projects": [
-    "AbcLeaves.Core",
-    "AbcLeaves.Api",
-    "AbcLeaves.BasicMvcClient"
-  ]
-}
