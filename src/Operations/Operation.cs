@@ -10,9 +10,6 @@ namespace Operations.Linq
             => new Operation<T>(valueFactory);
 
         public static IOperation<T> Get<T>(Func<IResult<T>> valueFactory)
-            => new Operation<T>(() => Task.FromResult(valueFactory()));
-
-        public static IOperation<T> Get<T>(Func<Task<T>> valueFactory)
             => new Operation<T>(() => Wrap(valueFactory()));
 
         public static IOperation<T> Get<T>(Func<T> valueFactory)
@@ -25,44 +22,49 @@ namespace Operations.Linq
             => Get<T>(() => Result.None<T>());
 
         public static IOperation<T> Where<T>(
-            this IOperation<T> self,
+            this IOperation<T> source,
             Func<T, bool> predicate)
-            => new Operation<T>(() =>
-                self.ExecuteAsync().ContinueWith(x =>
-                    HasValue(x) && predicate(GetValue(x)) ?
-                        Result.Just<T>(GetValue(x)) :
-                        Result.None<T, T>(x.Result)));
+            => Get(() => source.ExecuteAsync().Bind(x =>
+                x.HasValue && predicate(x.Value) ?
+                    x.Wrap() :
+                    Result.None<T, T>(x).Wrap()));
 
         public static IOperation<U> Select<T, U>(
-            this IOperation<T> self,
+            this IOperation<T> source,
             Func<T, U> selector)
-            => new Operation<U>(() =>
-                self.ExecuteAsync().ContinueWith(x =>
-                    HasValue(x) ?
-                        Result.Just<U>(selector(GetValue(x))) :
-                        Result.None<T, U>(x.Result)));
+            => Get(() => source.ExecuteAsync().Bind(x =>
+                x.HasValue ?
+                    Result.Just<U>(selector(x.Value)).Wrap() :
+                    Result.None<T, U>(x).Wrap()));
+
+        public static IOperation<U> Bind<T, U>(
+            this IOperation<T> source,
+            Func<T, IOperation<U>> selector)
+            => Get(() => source.ExecuteAsync().Bind(x =>
+                x.HasValue ?
+                    selector(x.Value).ExecuteAsync() :
+                    Result.None<T, U>(x).Wrap()));
 
         public static IOperation<U> SelectMany<T, V, U>(
-            this IOperation<T> self,
+            this IOperation<T> source,
             Func<T, IOperation<V>> selector,
             Func<T, V, U> resultSelector)
-            => Select(self, Compose(selector, resultSelector));
+            => Bind(source, Compose(selector, resultSelector));
 
-        private static Func<T, U> Compose<T, V, U>(
+        private static Func<T, IOperation<U>> Compose<T, V, U>(
             Func<T, IOperation<V>> selector,
             Func<T, V, U> resultSelector)
-            => x => resultSelector(x, GetValue(selector(x)));
+            => x => Get(() => selector(x).ExecuteAsync().Bind(y =>
+                y.HasValue ?
+                    Result.Just<U>(resultSelector(x, y.Value)).Wrap() :
+                    Result.None<V, U>(y).Wrap()));
 
-        private static Task<IResult<T>> Wrap<T>(Task<T> source)
-            => source.ContinueWith(x => Result.Just<T>(source.Result));
+        private static Task<T> Wrap<T>(this T value)
+            => Task.FromResult(value);
 
-        private static bool HasValue<T>(Task<IResult<T>> source)
-            => source.Result.HasValue;
-
-        private static T GetValue<T>(Task<IResult<T>> source)
-            => source.Result.Value;
-
-        private static T GetValue<T>(IOperation<T> source)
-            => source.ExecuteAsync().Result.Value;
+        private static async Task<U> Bind<T, U>(
+            this Task<T> source,
+            Func<T, Task<U>> selector)
+            => await selector(await source);
     }
 }
