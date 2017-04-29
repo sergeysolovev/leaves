@@ -13,10 +13,10 @@ namespace Operations.Linq
             => new Operation<T>(() => Wrap(valueFactory()));
 
         public static IOperation<T> Get<T>(Func<T> valueFactory)
-            => Get<T>(() => Result.Just(valueFactory()));
+            => Get<T>(() => Result.Succeed(valueFactory()));
 
         public static IOperation<T> Get<T>(T value)
-            => Get<T>(() => Result.Just(value));
+            => Get<T>(() => Result.Succeed(value));
 
         public static IOperation<T> None<T>()
             => Get<T>(() => Result.None<T>());
@@ -25,25 +25,25 @@ namespace Operations.Linq
             this IOperation<T> source,
             Func<T, bool> predicate)
             => Get(() => source.ExecuteAsync().Bind(x =>
-                x.HasValue && predicate(x.Value) ?
+                x.Succeeded && predicate(x.Value) ?
                     x.Wrap() :
-                    Result.None<T, T>(x).Wrap()));
+                    Result.FailFrom(x).Wrap()));
 
         public static IOperation<U> Select<T, U>(
             this IOperation<T> source,
             Func<T, U> selector)
             => Get(() => source.ExecuteAsync().Bind(x =>
-                x.HasValue ?
-                    Result.Just<U>(selector(x.Value)).Wrap() :
-                    Result.None<T, U>(x).Wrap()));
+                x.Succeeded ?
+                    Result.Succeed(selector(x.Value)).Wrap() :
+                    Result.FailFrom<T, U>(x).Wrap()));
 
         public static IOperation<U> Bind<T, U>(
             this IOperation<T> source,
             Func<T, IOperation<U>> selector)
             => Get(() => source.ExecuteAsync().Bind(x =>
-                x.HasValue ?
+                x.Succeeded ?
                     selector(x.Value).ExecuteAsync() :
-                    Result.None<T, U>(x).Wrap()));
+                    Result.FailFrom<T, U>(x).Wrap()));
 
         public static IOperation<U> SelectMany<T, V, U>(
             this IOperation<T> source,
@@ -55,9 +55,9 @@ namespace Operations.Linq
             Func<T, IOperation<V>> selector,
             Func<T, V, U> resultSelector)
             => x => Get(() => selector(x).ExecuteAsync().Bind(y =>
-                y.HasValue ?
-                    Result.Just<U>(resultSelector(x, y.Value)).Wrap() :
-                    Result.None<V, U>(y).Wrap()));
+                y.Succeeded ?
+                    Result.Succeed(resultSelector(x, y.Value)).Wrap() :
+                    Result.FailFrom<V, U>(y).Wrap()));
 
         private static Task<T> Wrap<T>(this T value)
             => Task.FromResult(value);

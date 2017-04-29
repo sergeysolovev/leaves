@@ -27,7 +27,7 @@ namespace Operations
             var familyBuilder = OperationTests.BuildFamily;
             Console.WriteLine("Building the family...");
             var family = await familyBuilder.ExecuteAsync();
-            if (!family.HasValue)
+            if (!family.Succeeded)
             {
                 Console.WriteLine("Family is not succeeded");
             }

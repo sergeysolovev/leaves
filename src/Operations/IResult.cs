@@ -6,7 +6,7 @@ namespace Operations
     public interface IResult<out T>
     {
         T Value { get; }
-        bool HasValue { get; }
+        bool Succeeded { get; }
         IDictionary<string, object> Properties { get; }
         Exception Error { get; }
     }
