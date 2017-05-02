@@ -5,8 +5,15 @@ namespace Operations
 {
     internal static class Throw
     {
-        public static T IfNull<T>(T param, string paramName) where T : class
-            => param ?? throw new ArgumentNullException(paramName);
+        public static T IfNull<T>(T param, string paramName)
+            => param is Object obj && obj == null ?
+                throw new ArgumentNullException(paramName) :
+                param;
+
+        public static string IfNullOrEmpty(string param, string paramName)
+            => String.IsNullOrEmpty(param) ?
+                throw new ArgumentNullException(paramName) :
+                param;
 
         public static T IfDefault<T>(T param, string paramName)
             => IsDefault(param) ?

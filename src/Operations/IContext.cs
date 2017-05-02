@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Operations
 {
-    public interface IResult<out T>
+    public interface IContext<out TResult>
     {
-        T Value { get; }
+        TResult Result { get; }
         bool Succeeded { get; }
         IDictionary<string, object> Properties { get; }
         Exception Error { get; }

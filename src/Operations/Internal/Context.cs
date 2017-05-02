@@ -3,39 +3,39 @@ using System.Collections.Generic;
 
 namespace Operations
 {
-    internal sealed class Result<T> : IResult<T>
+    internal sealed class Context<T> : IContext<T>
     {
-        public T Value { get; }
+        public T Result { get; }
         public bool Succeeded { get; private set; }
         public IDictionary<string, object> Properties { get; }
         public Exception Error { get; }
 
-        internal Result<T> Fail()
+        internal Context<T> Fail()
         {
             Succeeded = false;
             return this;
         }
 
-        internal Result()
+        internal Context()
         {
             Properties = GetProperties();
         }
 
-        internal Result(T value, IDictionary<string, object> props = null)
+        internal Context(T value, IDictionary<string, object> props = null)
         {
-            Value = Throw.IfDefault(value, nameof(value));
+            Result = Throw.IfDefault(value, nameof(value));
             Properties = GetProperties(props);
             Succeeded = true;
         }
 
-        internal Result(T value, Exception error, IDictionary<string, object> props = null)
+        internal Context(T value, Exception error, IDictionary<string, object> props = null)
         {
-            Value = value;
+            Result = value;
             Error = error;
             Properties = GetProperties(props);
         }
 
-        internal Result(Exception error, IDictionary<string, object> props = null)
+        internal Context(Exception error, IDictionary<string, object> props = null)
         {
             Error = error;
             Properties = GetProperties(props);

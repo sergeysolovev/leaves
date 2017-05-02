@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    public interface IOperation<T>
+    public interface IOperation<TResult>
     {
-        Task<IResult<T>> ExecuteAsync();
+        Task<IContext<TResult>> ExecuteAsync();
     }
 }
