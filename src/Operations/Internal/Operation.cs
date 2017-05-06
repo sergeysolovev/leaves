@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    internal class Operation<T> : IOperation<T>
+    internal class Operation<TResult> : IOperation<TResult>
     {
-        private readonly Func<Task<IContext<T>>> valueFactory;
+        private readonly Func<Task<IContext<TResult>>> valueFactory;
 
-        public Task<IContext<T>> ExecuteAsync()
+        public Task<IContext<TResult>> ExecuteAsync()
             => valueFactory();
 
-        public Operation(Func<Task<IContext<T>>> valueFactory)
+        public Operation(Func<Task<IContext<TResult>>> valueFactory)
             => this.valueFactory = Throw.IfNull(valueFactory, nameof(valueFactory));
     }
 }

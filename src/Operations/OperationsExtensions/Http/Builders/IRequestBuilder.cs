@@ -1,6 +1,8 @@
+using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
-namespace Operations.Http
+namespace Operations.Extensions.Http
 {
     public interface IRequestBuilder
     {

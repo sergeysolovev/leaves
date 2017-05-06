@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Operations.Http
+namespace Operations.Extensions.Http
 {
     public sealed class HttpResponseDetails
     {

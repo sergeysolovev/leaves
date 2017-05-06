@@ -6,13 +6,7 @@ namespace Operations
 {
     public static class Context
     {
-        public static IContext<T> With<T>(this IContext<T> source, Action<T> doAction)
-        {
-            doAction(source.Result);
-            return source;
-        }
-
-        public static IContext<T> None<T>()
+        public static IContext<T> Default<T>()
             => new Context<T>(null);
 
         public static IContext<T> Succeed<T>(T value, Dictionary<string, object> props = null)

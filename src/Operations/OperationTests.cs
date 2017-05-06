@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
-using Operations.Linq;
 
 namespace Operations
 {
@@ -24,9 +23,9 @@ namespace Operations
         public static async Task TestBuildFamily()
         {
             Console.WriteLine("Building a family builder...");
-            var familyBuilder = OperationTests.BuildFamily;
+            var buildFamily = OperationTests.BuildFamily;
             Console.WriteLine("Building the family...");
-            var family = await familyBuilder.ExecuteAsync();
+            var family = await buildFamily.ExecuteAsync();
             if (!family.Succeeded)
             {
                 Console.WriteLine("Family is not succeeded");

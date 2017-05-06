@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Operations.Http
+namespace Operations.Extensions.Http
 {
     public sealed class HttpRequestDetails
     {
