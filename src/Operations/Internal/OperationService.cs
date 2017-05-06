@@ -8,7 +8,7 @@ namespace Operations
     /// <summary>
     /// Immutable, stateless
     /// </summary>
-    internal struct OperationService<TSource, TResult> : IOperationService<TSource, TResult>
+    internal class OperationService<TSource, TResult> : IOperationService<TSource, TResult>
     {
         private readonly Func<TSource, IOperation<TResult>> closure;
 
@@ -22,7 +22,7 @@ namespace Operations
     /// <summary>
     /// Immutable, stateless
     /// </summary>
-    internal struct OperationService<TResult> : IOperationService<TResult>
+    internal class OperationService<TResult> : IOperationService<TResult>
     {
         private readonly Func<TResult, IOperation<TResult>> closure;
 

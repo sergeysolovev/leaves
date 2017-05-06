@@ -6,7 +6,7 @@ namespace Operations
     /// <summary>
     /// Immutable
     /// </summary>
-    internal struct Context<T> : IContext<T>
+    internal class Context<T> : IContext<T>
     {
         public T Result { get; }
         public bool Succeeded { get; private set; }
