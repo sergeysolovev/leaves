@@ -1,7 +1,8 @@
 namespace Operations
 {
-    public interface IBuilder<TResult, out TReturn> : IOperationBuilder<TResult>
+    public interface IBuilder<TResult, out TBuilder> : IOperationBuilder<TResult>
+        where TBuilder : IBuilder<TResult, TBuilder>
     {
-        TReturn Return(IOperation<TResult> source);
+        TBuilder Return(IOperation<TResult> source);
     }
 }

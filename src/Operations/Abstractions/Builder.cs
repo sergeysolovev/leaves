@@ -6,14 +6,15 @@ namespace Operations
     /// <summary>
     /// Immutable, stateless
     /// </summary>
-    public abstract class Builder<TResult, TReturn> : IBuilder<TResult, TReturn>
+    public abstract class Builder<TResult, TBuilder> : IBuilder<TResult, TBuilder>
+        where TBuilder : Builder<TResult, TBuilder>
     {
         private readonly IOperation<TResult> source;
 
         public IOperation<TResult> Build()
             => source;
 
-        public abstract TReturn Return(IOperation<TResult> source);
+        public abstract TBuilder Return(IOperation<TResult> source);
 
         protected Builder(IOperation<TResult> source)
             => this.source = Throw.IfNull(source, nameof(source));
@@ -21,19 +22,19 @@ namespace Operations
         protected Builder(TResult source)
             : this(Operation.Return(source)) { }
 
-        protected TReturn With(IOperationService<TResult> service)
+        protected TBuilder With(IOperationService<TResult> service)
             => this.With(service);
 
-        protected TReturn With(Func<TResult, Task<IContext<TResult>>> closure)
+        protected TBuilder With(Func<TResult, Task<IContext<TResult>>> closure)
             => this.With(closure);
 
-        protected TReturn With(Func<TResult, IContext<TResult>> closure)
+        protected TBuilder With(Func<TResult, IContext<TResult>> closure)
             => this.With(closure);
 
-        protected TReturn With(Func<TResult, TResult> selector)
+        protected TBuilder With(Func<TResult, TResult> selector)
             => this.With(selector);
 
-        protected TReturn When(Func<TResult, bool> predicate)
+        protected TBuilder When(Func<TResult, bool> predicate)
             => this.When(predicate);
     }
 }
