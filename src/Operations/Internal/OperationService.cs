@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    internal class OperationService<TSource, TResult> : IOperationService<TSource, TResult>
+    internal struct OperationService<TSource, TResult> : IOperationService<TSource, TResult>
     {
         private readonly Func<TSource, IOperation<TResult>> closure;
 
@@ -16,7 +16,7 @@ namespace Operations
             => closure(value);
     }
 
-    internal class OperationService<TResult> : IOperationService<TResult>
+    internal struct OperationService<TResult> : IOperationService<TResult>
     {
         private readonly Func<TResult, IOperation<TResult>> closure;
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    internal class Operation<TResult> : IOperation<TResult>
+    internal struct Operation<TResult> : IOperation<TResult>
     {
         private readonly Func<Task<IContext<TResult>>> valueFactory;
 

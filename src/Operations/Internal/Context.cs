@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Operations
 {
-    internal sealed class Context<T> : IContext<T>
+    internal struct Context<T> : IContext<T>
     {
         public T Result { get; }
         public bool Succeeded { get; private set; }
@@ -16,32 +16,31 @@ namespace Operations
             return this;
         }
 
-        internal Context()
-        {
-            Properties = GetProperties();
-        }
-
         internal Context(T value, IDictionary<string, object> props = null)
         {
             Result = Throw.IfDefault(value, nameof(value));
-            Properties = GetProperties(props);
             Succeeded = true;
+            Error = null;
+            Properties = GetProperties(props);
         }
 
         internal Context(T value, Exception error, IDictionary<string, object> props = null)
         {
             Result = value;
+            Succeeded = false;
             Error = error;
             Properties = GetProperties(props);
         }
 
         internal Context(Exception error, IDictionary<string, object> props = null)
         {
+            Result = default(T);
+            Succeeded = false;
             Error = error;
             Properties = GetProperties(props);
         }
 
-        private IDictionary<string, object> GetProperties(
+        private static IDictionary<string, object> GetProperties(
             IDictionary<string, object> props = null)
             => props == null ?
                 new Dictionary<string, object>() :
