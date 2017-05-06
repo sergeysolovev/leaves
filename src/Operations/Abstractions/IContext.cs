@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Operations
 {
+    /// <summary>
+    /// Immutable operation context
+    /// </summary>
     public interface IContext<out TResult>
     {
         TResult Result { get; }

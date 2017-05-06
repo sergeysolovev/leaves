@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
+    /// <summary>
+    /// Immutable, stateless
+    /// </summary>
     public abstract class Builder<TResult, TReturn> : IBuilder<TResult, TReturn>
     {
         private readonly IOperation<TResult> source;

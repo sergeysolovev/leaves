@@ -7,7 +7,9 @@ namespace Operations.Exe
     {
         static void Main(string[] args)
         {
-            OperationTests.TestBuildFamily().Wait();
+            //OperationTests.TestBuildFamily().Wait();
+            int s = sizeof(Func<int, Task<IContext<int>>>);
+            Console.WriteLine();
         }
     }
 }

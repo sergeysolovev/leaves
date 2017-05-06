@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
+    /// <summary>
+    /// Immutable, stateless
+    /// </summary>
     internal struct Operation<TResult> : IOperation<TResult>
     {
         private readonly Func<Task<IContext<TResult>>> valueFactory;

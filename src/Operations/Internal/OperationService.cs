@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
+    /// <summary>
+    /// Immutable, stateless
+    /// </summary>
     internal struct OperationService<TSource, TResult> : IOperationService<TSource, TResult>
     {
         private readonly Func<TSource, IOperation<TResult>> closure;
@@ -16,6 +19,9 @@ namespace Operations
             => closure(value);
     }
 
+    /// <summary>
+    /// Immutable, stateless
+    /// </summary>
     internal struct OperationService<TResult> : IOperationService<TResult>
     {
         private readonly Func<TResult, IOperation<TResult>> closure;

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Operations
 {
+    /// <summary>
+    /// Immutable
+    /// </summary>
     internal struct Context<T> : IContext<T>
     {
         public T Result { get; }
