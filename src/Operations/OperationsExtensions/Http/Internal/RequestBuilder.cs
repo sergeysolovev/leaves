@@ -13,18 +13,12 @@ namespace Operations.Extensions.Http
         IAbsoluteUriRequestBuilder,
         IRelativeUriRequestBuilder
     {
-        private RequestBuilder(IOperation<HttpRequestMessage> source) : base(source) { }
-        internal RequestBuilder() : base(Operation.ReturnNew<HttpRequestMessage>()) { }
-
-        public override RequestBuilder Return(IOperation<HttpRequestMessage> source)
-            => new RequestBuilder(source);
-
         IAbsoluteUriRequestBuilder IBuilder<HttpRequestMessage, IAbsoluteUriRequestBuilder>.Return(
-            IOperation<HttpRequestMessage> source)
+            IOperationService<HttpRequestMessage> source)
             => Return(source);
 
         IRelativeUriRequestBuilder IBuilder<HttpRequestMessage, IRelativeUriRequestBuilder>.Return(
-            IOperation<HttpRequestMessage> source)
+            IOperationService<HttpRequestMessage> source)
             => Return(source);
 
         IAbsoluteUriRequestBuilder IRequestBuilder.UseAbsoluteUri(

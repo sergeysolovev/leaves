@@ -1,7 +1,7 @@
 namespace Operations
 {
-    public interface IOperationBuilder<TResult>
+    public interface IOperationBuilder<T>
     {
-        IOperation<TResult> Build();
+        IOperation<T> BuildWith(T injection);
     }
 }
