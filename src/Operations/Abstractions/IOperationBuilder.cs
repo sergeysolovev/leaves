@@ -1,5 +1,3 @@
-using System;
-
 namespace Operations
 {
     public interface IOperationBuilder<TResult>

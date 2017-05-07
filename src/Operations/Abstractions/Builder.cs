@@ -3,9 +3,6 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    /// <summary>
-    /// Immutable, stateless
-    /// </summary>
     public abstract class Builder<TResult, TBuilder> : IBuilder<TResult, TBuilder>
         where TBuilder : Builder<TResult, TBuilder>
     {
