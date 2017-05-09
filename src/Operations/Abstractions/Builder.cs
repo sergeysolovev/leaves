@@ -3,50 +3,40 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    public class Builder<T> : Builder<T, Builder<T>>
+    public abstract class Builder<T, TSelf> : IBuilder<T, TSelf>
+        where TSelf : Builder<T, TSelf>
     {
-    }
+        private IOperation<T> source;
 
-    public abstract class Builder<T, TBuilder> : IBuilder<T, TBuilder>
-        where TBuilder : Builder<T, TBuilder>, new()
-    {
-        private IOperationService<T> service;
+        protected Builder(T source)
+            : this(Operation.Return(source)) { }
 
-        protected Builder()
-            : this(OperationService.Id<T>()) { }
+        protected Builder(IOperation<T> source)
+            => this.source = Throw.IfNull(source, nameof(source));
 
-        protected Builder(IOperationService<T> source)
-            => service = source;
+        public IOperation<T> Build()
+            => source;
 
-        protected Builder(Func<T, IContext<T>> closure)
-            => service = OperationService.Return<T>(closure);
-
-        protected Builder(Func<T, Task<IContext<T>>> closure)
-            => service = OperationService.Return<T>(closure);
-
-        protected Builder(Func<T, IOperation<T>> closure)
-            => service = OperationService.Return<T>(closure);
-
-        public IOperation<T> BuildWith(T injection)
-            => service.Inject(injection);
-
-        public TBuilder Return(IOperationService<T> source)
+        public virtual TSelf Return(IOperation<T> source)
         {
-            var builder = new TBuilder();
-            builder.service = source;
+            TSelf builder = this is TSelf ?
+                MemberwiseClone() as TSelf :
+                throw new InvalidOperationException(
+                    $"The type {typeof(TSelf)} has to be {this}");
+            builder.source = source;
             return builder;
         }
 
-        protected TBuilder With(IOperationService<T> service)
-            => this.With(service);
+        protected TSelf With(IOperationService<T> service)
+            => Builder.With(this, service);
 
-        protected TBuilder With(Func<T, IOperation<T>> closure)
-            => this.With(closure);
+        protected TSelf With(Func<T, IOperation<T>> closure)
+            => Builder.With(this, closure);
 
-        protected TBuilder With(Func<T, Task<IContext<T>>> closure)
-            => this.With(closure);
+        protected TSelf With(Func<T, Task<IContext<T>>> closure)
+            => Builder.With(this, closure);
 
-        protected TBuilder With(Func<T, IContext<T>> closure)
-            => this.With(closure);
+        protected TSelf With(Func<T, IContext<T>> closure)
+            => Builder.With(this, closure);
     }
 }

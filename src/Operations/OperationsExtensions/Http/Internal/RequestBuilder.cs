@@ -13,12 +13,15 @@ namespace Operations.Extensions.Http
         IAbsoluteUriRequestBuilder,
         IRelativeUriRequestBuilder
     {
+        public RequestBuilder(HttpRequestMessage request) : base(request) { }
+        public RequestBuilder() : this(new HttpRequestMessage()) { }
+
         IAbsoluteUriRequestBuilder IBuilder<HttpRequestMessage, IAbsoluteUriRequestBuilder>.Return(
-            IOperationService<HttpRequestMessage> source)
+            IOperation<HttpRequestMessage> source)
             => Return(source);
 
         IRelativeUriRequestBuilder IBuilder<HttpRequestMessage, IRelativeUriRequestBuilder>.Return(
-            IOperationService<HttpRequestMessage> source)
+            IOperation<HttpRequestMessage> source)
             => Return(source);
 
         IAbsoluteUriRequestBuilder IRequestBuilder.UseAbsoluteUri(

@@ -3,9 +3,13 @@ using System.Threading.Tasks;
 
 namespace Operations
 {
-    public interface IBuilder<T, out TBuilder> : IOperationBuilder<T>
-        where TBuilder : IBuilder<T, TBuilder>
+    public interface IBuilder<T, TSelf> : IOperationBuilder<T>
     {
-        TBuilder Return(IOperationService<T> source);
+        TSelf Return(IOperation<T> source);
+    }
+
+    public interface IPreBuilder<T, TSelf> : IOperationPreBuilder<T>
+    {
+        TSelf Return(IOperationService<T> source);
     }
 }
