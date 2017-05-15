@@ -1,0 +1,69 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{12892E74-1CB6-463D-A819-4ADCAC48A74E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcLeaves.Api", "src\AbcLeaves.Api\AbcLeaves.Api.csproj", "{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcLeaves.Core", "src\AbcLeaves.Core\AbcLeaves.Core.csproj", "{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcLeaves.BasicMvcClient", "src\AbcLeaves.BasicMvcClient\AbcLeaves.BasicMvcClient.csproj", "{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|x64.ActiveCfg = Debug|x64
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|x64.Build.0 = Debug|x64
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|x86.ActiveCfg = Debug|x86
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Debug|x86.Build.0 = Debug|x86
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|x64.ActiveCfg = Release|x64
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|x64.Build.0 = Release|x64
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|x86.ActiveCfg = Release|x86
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49}.Release|x86.Build.0 = Release|x86
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|x64.ActiveCfg = Debug|x64
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|x64.Build.0 = Debug|x64
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|x86.ActiveCfg = Debug|x86
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Debug|x86.Build.0 = Debug|x86
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|x64.ActiveCfg = Release|x64
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|x64.Build.0 = Release|x64
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|x86.ActiveCfg = Release|x86
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54}.Release|x86.Build.0 = Release|x86
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|x64.ActiveCfg = Debug|x64
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|x64.Build.0 = Debug|x64
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|x86.ActiveCfg = Debug|x86
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Debug|x86.Build.0 = Debug|x86
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|x64.ActiveCfg = Release|x64
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|x64.Build.0 = Release|x64
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|x86.ActiveCfg = Release|x86
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FEBB4D4E-C923-4D21-98DE-59216A7EAB49} = {12892E74-1CB6-463D-A819-4ADCAC48A74E}
+		{476EBAF4-52EC-4537-A72E-F91C2AD1BA54} = {12892E74-1CB6-463D-A819-4ADCAC48A74E}
+		{E24B5BD2-E989-46E1-8D6E-F0BCF2CECFA8} = {12892E74-1CB6-463D-A819-4ADCAC48A74E}
+	EndGlobalSection
+EndGlobal

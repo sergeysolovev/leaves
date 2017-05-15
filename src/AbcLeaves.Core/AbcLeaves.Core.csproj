@@ -16,8 +16,4 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Operations\Operations.csproj" />
-  </ItemGroup>
-
 </Project>
