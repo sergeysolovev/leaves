@@ -41,9 +41,6 @@ namespace AbcLeaves.Api.Domain
             this.configuration = Throw.IfNull(configuration, nameof(configuration));
         }
 
-        public string GetEmailClaim(ClaimsPrincipal principal)
-            => principal.FindFirstValue("email");
-
         public string GetSubjectClaim(ClaimsPrincipal principal)
             => principal.FindFirstValue("sub");
 
