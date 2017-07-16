@@ -10,17 +10,18 @@ namespace AbcLeaves.Api.Controllers
 {
     [Route("api/leaves")]
     [Authorize(ActiveAuthenticationSchemes = "Bearer")]
-    public class LeavesController : ControllerBase
+    public class LeavesController : Controller
     {
-        private readonly IUserManager userManager;
-        private readonly ILeavesManager leavesManager;
-        private readonly IModelStateHelper modelHelper;
         private readonly IMapper mapper;
+        private readonly UserManager userManager;
+        private readonly LeavesManager leavesManager;
+        private readonly ModelStateHelper modelHelper;
 
-        public LeavesController(IUserManager userManager,
-            ILeavesManager leavesManager,
-            IModelStateHelper modelStateHelper,
-            IMapper mapper)
+        public LeavesController(
+            IMapper mapper,
+            UserManager userManager,
+            LeavesManager leavesManager,
+            ModelStateHelper modelStateHelper)
         {
             this.userManager = userManager;
             this.leavesManager = leavesManager;
@@ -32,19 +33,26 @@ namespace AbcLeaves.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]LeavePostDto leaveDto)
         {
-            var result = await OperationFlow<LeaveApplyResult>
-                .BeginWith(() => ModelState.IsValid ?
-                    ModelValidationResult.Success :
-                    ModelValidationResult.Fail(modelHelper.GetValidationErrors(ModelState)))
-                .ProceedWith(x => userManager.EnsureUserCreatedAsync(HttpContext.User))
-                .ProceedWith(userResult => {
-                    var user = userResult.User;
-                    var leaveApplyDto = mapper.Map<LeavePostDto, LeaveApplyDto>(
-                        leaveDto, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id));
-                    return leavesManager.ApplyAsync(leaveApplyDto);
-                })
-                .Return();
-            return FromOperationResult(result);
+            if (!ModelState.IsValid)
+            {
+                return ModelValidationResult
+                    .Fail(modelHelper.GetValidationErrors(ModelState))
+                    .ToMvcActionResult();
+            }
+
+            var user = await userManager.GetOrCreateUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            var leaveApplyDto = mapper.Map<LeavePostDto, LeaveApplyDto>(
+                leaveDto, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id)
+            );
+
+            return await leavesManager
+                .ApplyAsync(leaveApplyDto)
+                .ToMvcActionResultAsync();
         }
 
         // PATCH api/leaves/{id}/approve
@@ -52,8 +60,9 @@ namespace AbcLeaves.Api.Controllers
         [Authorize(Policy = "CanApproveLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
         {
-            var result = await leavesManager.ApproveAsync(id);
-            return FromOperationResult(result);
+            return await leavesManager
+                .ApproveAsync(id)
+                .ToMvcActionResultAsync();
         }
 
         // PATCH api/leaves/{id}/decline
@@ -61,8 +70,9 @@ namespace AbcLeaves.Api.Controllers
         [Authorize(Policy = "CanDeclineLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
         {
-            var result = await leavesManager.DeclineAsync(id);
-            return FromOperationResult(result);
+            return await leavesManager
+                .DeclineAsync(id)
+                .ToMvcActionResultAsync();
         }
     }
 }

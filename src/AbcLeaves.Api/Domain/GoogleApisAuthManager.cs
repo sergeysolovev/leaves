@@ -7,37 +7,34 @@ using AbcLeaves.Core;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class GoogleApisAuthManager : IGoogleApisAuthManager
+    public class GoogleApisAuthManager
     {
-        private readonly IUserManager userManager;
-        private readonly IGoogleOAuthService googleAuthService;
+        private readonly UserManager userManager;
+        private readonly GoogleOAuthClient googleAuthClient;
 
-        public GoogleApisAuthManager(
-            IUserManager userManager,
-            IGoogleOAuthService googleAuthService)
+        public GoogleApisAuthManager(UserManager userManager, GoogleOAuthClient googleAuthClient)
         {
-            if (userManager == null)
-            {
-                throw new ArgumentNullException(nameof(userManager));
-            }
-            if (googleAuthService == null)
-            {
-                throw new ArgumentNullException(nameof(googleAuthService));
-            }
-
-            this.userManager = userManager;
-            this.googleAuthService = googleAuthService;
+            this.userManager = Throw.IfNull(userManager, nameof(userManager));
+            this.googleAuthClient = Throw.IfNull(googleAuthClient, nameof(googleAuthClient));
         }
 
         public async Task<VerifyAccessResult> VerifyAccess(ClaimsPrincipal principal)
         {
-            return await OperationFlow<VerifyAccessResult>
-                .BeginWith(() => userManager.EnsureUserCreatedAsync(principal))
-                .ExitOnFailWith(user => VerifyAccessResult.FailFrom(user))
-                .ProceedWith(user => userManager.GetRefreshTokenAsync(user.User))
-                .ProceedWith(token => googleAuthService.ValidateRefreshTokenAsync(token.Value))
-                .ExitOnFailWith(x => VerifyAccessResult.FailForbidden)
-                .Return();
+            var user = await userManager.GetOrCreateUserAsync(principal);
+            if (user == null)
+            {
+                return VerifyAccessResult.Fail(
+                    "Failed to verify access to google apis"
+                );
+            }
+
+            var refreshToken = await userManager.GetRefreshTokenAsync(user);
+            if (String.IsNullOrEmpty(refreshToken))
+            {
+                return VerifyAccessResult.Succeed(isForbidden: true);
+            }
+
+            return await googleAuthClient.ValidateRefreshTokenAsync(refreshToken);
         }
 
         public async Task<VerifyAccessResult> GrantAccess(
@@ -45,41 +42,66 @@ namespace AbcLeaves.Api.Domain
             string redirectUrl,
             ClaimsPrincipal principal)
         {
-            return await OperationFlow<VerifyAccessResult>
-                .BeginWith(() => userManager.EnsureUserCreatedAsync(principal))
-                .ProceedWithClosure(user => user
-                    .ProceedWith(x => googleAuthService.ExchangeAuthCode(code, redirectUrl))
-                    .ProceedWithClosure(exchange => exchange
-                        .ProceedWith(x => VerifyOAuthExchangeIdentity(
-                            principal: principal,
-                            idToken: exchange.Current.Tokens.IdToken))
-                        .ProceedWith(x => userManager.SaveRefreshTokenAsync(
-                            user: user.Current.User,
-                            token: exchange.Current.Tokens.RefreshToken))))
-                .EndWith(VerifyAccessResult.Success)
-                .Return();
+            var user = await userManager.GetOrCreateUserAsync(principal);
+            if (user == null)
+            {
+                return VerifyAccessResult.Fail(
+                    "Failed to grant access to google apis"
+                );
+            }
+
+            var exchangeCodeResult = await googleAuthClient.ExchangeAuthCode(code, redirectUrl);
+            if (!exchangeCodeResult.Succeeded)
+            {
+                return VerifyAccessResult.Fail(
+                    "Failed to grant access to google apis"
+                );
+            }
+
+            var idToken = exchangeCodeResult.Tokens.IdToken;
+            if (!VerifyOAuthExchangeIdentity(principal, idToken))
+            {
+                return VerifyAccessResult.Fail(
+                    "Failed to grant access to google apis. " +
+                    "Authorization code doesn't match the authenticated identity"
+                );
+            }
+
+            var refreshToken = exchangeCodeResult.Tokens.RefreshToken;
+            var identityResult = await userManager.SetRefreshTokenAsync(user, refreshToken);
+            if (!identityResult.Succeeded)
+            {
+                return VerifyAccessResult.Fail(
+                    "Failed to grant access to google apis"
+                );
+            }
+
+            return VerifyAccessResult.Succeed();
         }
 
-        private async Task<OperationResult> VerifyOAuthExchangeIdentity(
-            ClaimsPrincipal principal,
-            string idToken)
+        private bool VerifyOAuthExchangeIdentity(ClaimsPrincipal principal, string idToken)
         {
-            var error = "Authorization code doesn't match the authenticated identity";
-            return await OperationFlow<OperationResult>
-                .BeginWith(() => userManager.GetSubjectClaim(principal))
-                .ProceedWithClosure(subject => subject
-                    .ProceedWith(x => GetJwtSubject(idToken))
-                    .ProceedWithClosure(idTokenSubject => idTokenSubject
-                        .ProceedWith(x =>
-                            String.Equals(
-                                a: subject.Current.Value,
-                                b: idTokenSubject.Current.Value,
-                                comparisonType: StringComparison.Ordinal) ?
-                            OperationResult.Success() : OperationResult.Fail(error))))
-                .Return();
+            var subject = userManager.GetSubjectClaim(principal);
+            if (subject == null)
+            {
+                return false;
+            }
+
+            var idTokenSubject = GetJwtSubject(idToken);
+            if (idTokenSubject == null)
+            {
+                return false;
+            }
+
+            if (!String.Equals(subject, idTokenSubject, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        private OperationResult GetJwtSubject(string token)
+        private string GetJwtSubject(string token)
         {
             JwtSecurityToken jwtToken = null;
             try
@@ -88,13 +110,13 @@ namespace AbcLeaves.Api.Domain
             }
             catch (ArgumentNullException)
             {
-                OperationResult.Fail("Failed to retrieve subject from jwt token");
+                return null;
             }
             catch (ArgumentException)
             {
-                OperationResult.Fail("Failed to retrieve subject from jwt token");
+                return null;
             }
-            return OperationResult.Success(jwtToken.Subject);
+            return jwtToken.Subject;
         }
     }
 }

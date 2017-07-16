@@ -6,11 +6,11 @@ namespace AbcLeaves.Api
 {
     public class HasPersistentClaimAuthorizationHandler : AuthorizationHandler<HasPersistentClaimRequirement>
     {
-        private readonly IUserManager userManager;
+        private readonly UserManager userManager;
 
-        public HasPersistentClaimAuthorizationHandler(IUserManager appUserManager)
+        public HasPersistentClaimAuthorizationHandler(UserManager userManager)
         {
-            this.userManager = appUserManager;
+            this.userManager = userManager;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,

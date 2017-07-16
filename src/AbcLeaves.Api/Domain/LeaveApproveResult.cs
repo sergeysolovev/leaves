@@ -4,32 +4,18 @@ using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class LeaveApproveResult : OperationResultBase, INotFoundOperationResult
+    public class LeaveApproveResult : OperationResult, IFindResult
     {
         [JsonIgnore]
         public bool NotFound { get; protected set; }
         public OperationResult ShareGoogleCalendarResult { get; private set; }
 
-        public LeaveApproveResult() : base()
+        protected LeaveApproveResult(OperationResult shareResult) : base()
         {
+            ShareGoogleCalendarResult = Throw.IfNull(shareResult, nameof(shareResult));
         }
 
-        protected LeaveApproveResult(OperationResult shareResult) : base(true)
-        {
-            if (shareResult == null)
-            {
-                throw new ArgumentNullException(nameof(shareResult));
-            }
-            ShareGoogleCalendarResult = shareResult;
-        }
-
-        protected LeaveApproveResult(string error)
-            : base(error, null)
-        {
-        }
-
-        protected LeaveApproveResult(IOperationResult result)
-            : base(result)
+        protected LeaveApproveResult(string error) : base(error)
         {
         }
 

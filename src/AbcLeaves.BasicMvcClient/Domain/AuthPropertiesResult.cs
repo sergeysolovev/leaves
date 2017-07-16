@@ -4,35 +4,23 @@ using Microsoft.AspNetCore.Http.Authentication;
 
 namespace AbcLeaves.BasicMvcClient.Domain
 {
-    public class AuthPropertiesResult : OperationResultBase
+    public class AuthPropertiesResult : OperationResult<AuthenticationProperties>
     {
-        public AuthenticationProperties AuthProperties { get; private set; }
-
-        public AuthPropertiesResult() : base() {}
-        protected AuthPropertiesResult(bool succeeded) : base(succeeded) {}
-        protected AuthPropertiesResult(IOperationResult fromResult) : base(fromResult) {}
+        public AuthenticationProperties AuthProperties => base.Value;
 
         protected AuthPropertiesResult(AuthenticationProperties authProperties)
-            : base(true)
-        {
-            AuthProperties = authProperties;
-        }
-
-        protected AuthPropertiesResult(string error, Dictionary<string, object> details)
-            : base(error, details)
+            : base(authProperties)
         {
         }
 
-        public static AuthPropertiesResult Success()
-            => new AuthPropertiesResult(true);
+        protected AuthPropertiesResult(string error) : base(error)
+        {
+        }
 
         public static AuthPropertiesResult Success(AuthenticationProperties authProperties)
             => new AuthPropertiesResult(authProperties);
 
-        public static AuthPropertiesResult Fail(string error, Dictionary<string, object> details = null)
-            => new AuthPropertiesResult(error, details);
-
-        public static AuthPropertiesResult FailFrom(IOperationResult fromResult)
-            => new AuthPropertiesResult(fromResult);
+        public static AuthPropertiesResult Fail(string error)
+            => new AuthPropertiesResult(error);
     }
 }

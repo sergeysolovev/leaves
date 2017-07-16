@@ -1,37 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AbcLeaves.Core;
 
 namespace AbcLeaves.BasicMvcClient.Domain
 {
-    public class ReturnUrlResult : OperationResultBase, IReturnUrlOperationResult
+    public class ReturnUrlResult : OperationResult, IReturnUrlResult
     {
         public string ReturnUrl { get; private set; }
 
-        public ReturnUrlResult() : base() {}
-        protected ReturnUrlResult(bool succeeded) : base(succeeded) {}
-        protected ReturnUrlResult(IOperationResult fromResult) : base(fromResult) {}
+        protected ReturnUrlResult(string url) : base()
+            => ReturnUrl = Throw.IfNullOrEmpty(url, nameof(url));
 
-        protected ReturnUrlResult(string returnUrl)
-            : base(true)
-        {
-            ReturnUrl = returnUrl;
-        }
+        protected ReturnUrlResult(Failure failure) : base(failure) { }
 
-        protected ReturnUrlResult(string error, Dictionary<string, object> details)
-            : base(error, details)
-        {
-        }
+        public static ReturnUrlResult Succeed(string url)
+            => new ReturnUrlResult(url);
 
-        public static ReturnUrlResult Success()
-            => new ReturnUrlResult(true);
-
-        public static ReturnUrlResult Success(string value)
-            => new ReturnUrlResult(value);
-
-        public static ReturnUrlResult Fail(string error, Dictionary<string, object> details = null)
-            => new ReturnUrlResult(error, details);
-
-        public static ReturnUrlResult FailFrom(IOperationResult fromResult)
-            => new ReturnUrlResult(fromResult);
+        public static ReturnUrlResult Fail(string error)
+            => new ReturnUrlResult(new Failure(error));
     }
 }

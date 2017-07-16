@@ -6,81 +6,69 @@ using AutoMapper;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class GoogleCalendarManager : IGoogleCalendarManager
+    public class GoogleCalendarManager
     {
         private readonly IMapper mapper;
-        private readonly IUserManager userManager;
-        private readonly IGoogleOAuthService googleAuthService;
-        private readonly GoogleCalendarApiClient googleCalendarApiClient;
+        private readonly UserManager userManager;
+        private readonly GoogleOAuthClient googleAuthClient;
+        private readonly GoogleCalendarClient googleCalendarClient;
 
         public GoogleCalendarManager(
             IMapper mapper,
-            IUserManager userManager,
-            IGoogleOAuthService googleAuthService,
-            GoogleCalendarApiClient googleCalendarApiClient)
+            UserManager userManager,
+            GoogleOAuthClient googleAuthClient,
+            GoogleCalendarClient googleCalendarClient)
         {
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mapper));
-            }
-            if (userManager == null)
-            {
-                throw new ArgumentNullException(nameof(userManager));
-            }
-            if (googleAuthService == null)
-            {
-                throw new ArgumentNullException(nameof(googleAuthService));
-            }
-            if (googleCalendarApiClient == null)
-            {
-                throw new ArgumentNullException(nameof(googleCalendarApiClient));
-            }
-
-            this.mapper = mapper;
-            this.userManager = userManager;
-            this.googleAuthService = googleAuthService;
-            this.googleCalendarApiClient = googleCalendarApiClient;
+            this.mapper = Throw.IfNull(mapper, nameof(mapper));
+            this.userManager = Throw.IfNull(userManager, nameof(userManager));
+            this.googleAuthClient = Throw.IfNull(googleAuthClient, nameof(googleAuthClient));
+            this.googleCalendarClient = Throw.IfNull(googleCalendarClient, nameof(googleCalendarClient));
         }
 
-        public async Task<OperationResult> PublishUserEventAsync(UserEventPublishDto userEvent)
+        public async Task<StringResult> PublishUserEventAsync(UserEventPublishDto userEvent)
         {
+            Throw.IfNull(userEvent, nameof(userEvent));
+
             var userId = userEvent.UserId;
-            if (String.IsNullOrEmpty(userId))
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
             {
-                // todo: log
-                return OperationResult.Fail(
-                    "An error occurred when publishing an event to Google Calendar");
+                return StringResult.Fail(
+                    "An error occurred when publishing an event to Google Calendar"
+                );
             }
 
-            var userResult = await userManager.FindUserByIdAsync(userId);
-            if (!userResult.Succeeded)
+            var refreshToken = await userManager.GetRefreshTokenAsync(user);
+            if (refreshToken == null)
             {
-                return OperationResult.FailFrom(userResult);
+                return StringResult.Fail(
+                    "An error occurred when publishing an event to Google Calendar"
+                );
             }
-            var user = userResult.User;
-            var tokenResult = await userManager.GetRefreshTokenAsync(user);
-            if (!tokenResult.Succeeded)
-            {
-                return OperationResult.FailFrom(tokenResult);
-            }
-            var refreshToken = tokenResult.Value;
-            var exchangeResult = await googleAuthService.ExchangeRefreshToken(refreshToken);
+
+            var exchangeResult = await googleAuthClient.ExchangeRefreshToken(refreshToken);
             if (!exchangeResult.Succeeded)
             {
-                return OperationResult.FailFrom(exchangeResult);
+                return StringResult.Fail(
+                    "An error occurred when publishing an event to Google Calendar"
+                );
             }
-            var accessToken = exchangeResult.AccessToken;
 
+            var accessToken = exchangeResult.AccessToken;
             var eventAddDto = mapper.Map<UserEventPublishDto, CalendarEventAddDto>(
                 userEvent,
-                opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken));
-            var eventAddResult = await googleCalendarApiClient.AddEventAsync(eventAddDto);
+                opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken)
+            );
+            var eventAddResult = await googleCalendarClient.AddEventAsync(eventAddDto);
             if (!eventAddResult.Succeeded)
             {
-                return OperationResult.FailFrom(eventAddResult);
+                return StringResult.Fail(
+                    "An error occurred when publishing an event to Google Calendar"
+                );
             }
+
             var eventUri = eventAddResult.Value;
-            return OperationResult.Success(eventUri);
+            return StringResult.Succeed(eventUri);
         }
     }
 }

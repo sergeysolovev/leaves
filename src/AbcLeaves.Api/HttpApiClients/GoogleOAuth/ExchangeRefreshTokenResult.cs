@@ -4,43 +4,23 @@ using AbcLeaves.Core;
 
 namespace AbcLeaves.Api
 {
-    public class ExchangeRefreshTokenResult : OperationResultBase
+    public class ExchangeRefreshTokenResult : OperationResult
     {
         public string AccessToken { get; private set; }
 
         public ExchangeRefreshTokenResult() : base() { }
 
-        protected ExchangeRefreshTokenResult(string accessToken)
-            : base(true)
+        protected ExchangeRefreshTokenResult(string accessToken) : base()
         {
-            if (String.IsNullOrEmpty(accessToken))
-            {
-                throw new ArgumentNullException(nameof(accessToken));
-            }
-
-            AccessToken = accessToken;
+            AccessToken = Throw.IfNullOrEmpty(accessToken, nameof(accessToken));
         }
 
-        protected ExchangeRefreshTokenResult(string error, Dictionary<string, object> details)
-            : base(error, details)
-        {
-        }
-
-        protected ExchangeRefreshTokenResult(IOperationResult result)
-            : base(result)
-        {
-        }
+        protected ExchangeRefreshTokenResult(Failure failure) : base(failure) { }
 
         public static ExchangeRefreshTokenResult Success(string accessToken)
             => new ExchangeRefreshTokenResult(accessToken);
 
-        public static ExchangeRefreshTokenResult FailFrom(IOperationResult result)
-            => new ExchangeRefreshTokenResult(result);
-
-        public static ExchangeRefreshTokenResult Fail(string error,
-            Dictionary<string, object> details = null)
-        {
-            return new ExchangeRefreshTokenResult(error, details);
-        }
+        public static ExchangeRefreshTokenResult Fail(string error)
+            => new ExchangeRefreshTokenResult(new Failure(error));
     }
 }

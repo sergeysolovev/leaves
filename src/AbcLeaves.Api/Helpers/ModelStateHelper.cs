@@ -5,7 +5,7 @@ using System;
 
 namespace AbcLeaves.Api.Helpers
 {
-    public class ModelStateHelper : IModelStateHelper
+    public class ModelStateHelper
     {
         public ModelStateHelper() { }
 
@@ -17,7 +17,8 @@ namespace AbcLeaves.Api.Helpers
                     x => x.Key,
                     x => x.Value.Errors
                         .Select(e => GetErrorMessage(e))
-                        .Where(e => e != null) as object);
+                        .Where(e => e != null) as object
+                );
         }
 
         private static string GetErrorMessage(ModelError error)

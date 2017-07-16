@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http.Features.Authentication;
 
 namespace AbcLeaves.BasicMvcClient.Domain
 {
-    public class AuthenticationManager : IAuthenticationManager, IBearerTokenProvider
+    public class AuthenticationManager
     {
         private readonly HttpContext httpContext;
         private readonly IDataProtectionProvider dataProtectionProvider;
@@ -27,88 +27,43 @@ namespace AbcLeaves.BasicMvcClient.Domain
             this.httpContext = httpContextAccessor.HttpContext;
         }
 
-        public async Task<AuthTokenResult> GetBearerToken()
-        {
-            return await GetIdTokenAsync();
-        }
-
-        public async Task<AuthPropertiesResult> GetAuthenticationPropertiesAsync()
+        public async Task<AuthenticationProperties> GetAuthenticationPropertiesAsync()
         {
             var authContext = new AuthenticateContext("GoogleOpenIdConnect");
             await httpContext.Authentication.AuthenticateAsync(authContext);
-            if (authContext.Principal == null || authContext.Properties == null)
-            {
-                return AuthPropertiesResult.Fail("Not authenticated");
-            }
-            var authProperties = new AuthenticationProperties(authContext.Properties);
-            return AuthPropertiesResult.Success(authProperties);
+            return new AuthenticationProperties(authContext.Properties);
         }
 
-        public async Task<AuthTokenResult> GetIdTokenAsync()
+        public async Task<string> GetIdTokenAsync()
         {
-            return await OperationFlow<AuthTokenResult>
-                .BeginWith(() => GetAuthenticationPropertiesAsync())
-                .ProceedWith(getProps => {
-                    var idToken = getProps.AuthProperties.GetTokenValue("id_token");
-                    if (String.IsNullOrEmpty(idToken))
-                    {
-                        return AuthTokenResult.Fail(
-                            "Failed to retrieve id_token from authenticated identity");
-                    }
-                    return AuthTokenResult.Success(idToken);
-                })
-                .Return();
+            var authProps = await GetAuthenticationPropertiesAsync();
+            return authProps.GetTokenValue("id_token");
         }
 
         public async Task<AuthPropertiesResult> TestCrossSiteRequestForgery(string state)
         {
-            return await OperationFlow<AuthPropertiesResult>
-                .BeginWith(() => UnprotectState(state))
-                .ProceedWithClosure(unprotect => unprotect
-                    .ProceedWith(x => GetIdTokenFromState(unprotect.Current.AuthProperties))
-                    .ProceedWithClosure(idTokenState => idTokenState
-                        .ProceedWith(x => GetIdTokenAsync())
-                        .ProceedWithClosure(idTokenCookie => idTokenCookie
-                        .ProceedWith(x => {
-                            var fromState = idTokenState.Current.Token;
-                            var fromCookie = idTokenCookie.Current.Token;
-                            if (!String.Equals(fromState, fromCookie, StringComparison.Ordinal))
-                            {
-                                return AuthPropertiesResult.Fail(
-                                    "id_token from cookies and state don't match");
-                            }
-                            return AuthPropertiesResult.Success(unprotect.Current.AuthProperties);
-                        }))))
-                .Return();
-        }
-
-        public OperationResult GetProtectedState(AuthenticationProperties authProperties)
-        {
-            var stateDataFormat = CreateStateDataFormat();
-            var state = stateDataFormat.Protect(authProperties);
-            return OperationResult.Success(state);
-        }
-
-        private AuthPropertiesResult UnprotectState(string state)
-        {
-            var stateDataFormat = CreateStateDataFormat();
-            var authProperties = stateDataFormat.Unprotect(state);
-            if (authProperties == null)
+            var authProps = UnprotectState(state);
+            var idTokenFromState = authProps.GetTokenValue("id_token");
+            var idTokenFromCookies = await GetIdTokenAsync();
+            if (!String.Equals(idTokenFromState, idTokenFromCookies, StringComparison.Ordinal))
             {
                 return AuthPropertiesResult.Fail(
-                    $"The value of the parameter {nameof(state)} is invalid");
+                    "id_token from cookies and state don't match"
+                );
             }
-            return AuthPropertiesResult.Success(authProperties);
+            return AuthPropertiesResult.Success(authProps);
         }
 
-        private AuthTokenResult GetIdTokenFromState(AuthenticationProperties authProperties)
+        public string GetProtectedState(AuthenticationProperties authProperties)
         {
-            var idToken = authProperties.GetTokenValue("id_token");
-            if (String.IsNullOrEmpty(idToken))
-            {
-                return AuthTokenResult.Fail("Failed to retrieve id_token from the state");
-            }
-            return AuthTokenResult.Success(idToken);
+            var stateDataFormat = CreateStateDataFormat();
+            return stateDataFormat.Protect(authProperties);
+        }
+
+        private AuthenticationProperties UnprotectState(string state)
+        {
+            var stateDataFormat = CreateStateDataFormat();
+            return stateDataFormat.Unprotect(state);
         }
 
         private PropertiesDataFormat CreateStateDataFormat()

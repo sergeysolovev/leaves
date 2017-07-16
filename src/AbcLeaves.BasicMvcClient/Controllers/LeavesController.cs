@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AbcLeaves.BasicMvcClient.Domain;
-using AbcLeaves.Core.Helpers;
 using AbcLeaves.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,17 +12,14 @@ namespace AbcLeaves.BasicMvcClient.Controllers
     public class LeavesController : Controller
     {
         private readonly LeavesApiClient leavesApiClient;
-        private readonly IAuthenticationManager authManager;
-        private readonly IMvcActionResultHelper mvcHelper;
+        private readonly AuthenticationManager authManager;
 
         public LeavesController(
             LeavesApiClient leavesApiClient,
-            IMvcActionResultHelper mvcHelper,
-            IAuthenticationManager authHelper)
+            AuthenticationManager authHelper)
         {
             this.authManager = authHelper;
             this.leavesApiClient = leavesApiClient;
-            this.mvcHelper = mvcHelper;
         }
 
         // GET /leaves/approve/{id}
@@ -31,7 +27,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         public async Task<IActionResult> ApproveLeave(string id)
         {
             var result = await leavesApiClient.ApproveLeaveAsync(id);
-            return mvcHelper.FromOperationResult(result);
+            return new ObjectResult(result);
         }
 
         // GET leaves/decline/{id}
@@ -39,7 +35,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         public async Task<IActionResult> DeclineLeave(string id)
         {
             var result = await leavesApiClient.DeclineLeaveAsync(id);
-            return mvcHelper.FromOperationResult(result);
+            return new ObjectResult(result);
         }
 
         // todo: get rid of this
@@ -92,19 +88,25 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         private async Task<IActionResult> NewInternal(bool afterGranted)
         {
             var verifyAccess = await leavesApiClient.VerifyGoogleApisAccess();
+
+            if (!verifyAccess.Succeeded)
+            {
+                return BadRequest(verifyAccess.Failure);
+            }
+
             if (verifyAccess.IsForbidden && !afterGranted)
             {
                 var returnUrl = Url.Action(nameof(NewAfterGranted));
                 var redirectUrl = Url.Action<GoogleApisController>(
                     action: nameof(GoogleApisController.GrantAccess),
-                    values: new { returnUrl = returnUrl });
+                    values: new {
+                        returnUrl = returnUrl
+                    }
+                );
                 return Redirect(redirectUrl);
             }
-            if (verifyAccess.IsGranted)
-            {
-                return View(nameof(New));
-            }
-            return BadRequest(verifyAccess);
+
+            return View(nameof(New));
         }
     }
 }

@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class LeavesManager : ILeavesManager
+    public class LeavesManager
     {
         private readonly IMapper mapper;
-        private readonly ILeavesRepository leavesRepository;
-        private readonly IGoogleCalendarManager googleCalendarManager;
+        private readonly LeavesRepository leavesRepository;
+        private readonly GoogleCalendarManager googleCalendarManager;
 
         public LeavesManager(
             IMapper mapper,
-            ILeavesRepository leavesRepository,
-            IGoogleCalendarManager googleCalendarManager)
+            LeavesRepository leavesRepository,
+            GoogleCalendarManager googleCalendarManager)
         {
             this.mapper = mapper;
             this.leavesRepository = leavesRepository;

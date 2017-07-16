@@ -7,15 +7,15 @@ using Microsoft.Extensions.Options;
 
 namespace AbcLeaves.BasicMvcClient.Domain
 {
-    public class GoogleApisAuthManager : IGoogleApisAuthManager
+    public class GoogleApisAuthManager
     {
         private readonly GoogleOAuthOptions options;
-        private readonly IAuthenticationManager authHelper;
+        private readonly AuthenticationManager authHelper;
         private readonly LeavesApiClient leavesApiClient;
 
         public GoogleApisAuthManager(
             IOptions<GoogleOAuthOptions> optionsAccessor,
-            IAuthenticationManager authHelper,
+            AuthenticationManager authHelper,
             LeavesApiClient leavesApiClient)
         {
             if (optionsAccessor == null)
@@ -39,15 +39,10 @@ namespace AbcLeaves.BasicMvcClient.Domain
             string redirectUrl,
             string returnUrl)
         {
-            return await OperationFlow<ReturnUrlResult>
-                .BeginWith(() => authHelper.GetAuthenticationPropertiesAsync())
-                .ProceedWith(getAuthProps => {
-                    getAuthProps.AuthProperties.Items.Add("returnUrl", returnUrl ?? "/");
-                    return getAuthProps;
-                })
-                .ProceedWith(getAuthProps => authHelper.GetProtectedState(getAuthProps.AuthProperties))
-                .ProceedWith(getState => BuildGoogleOAuthChallengeUrl(redirectUrl, getState.Value))
-                .Return();
+            var authProps = await authHelper.GetAuthenticationPropertiesAsync();
+            authProps.Items.Add("returnUrl", returnUrl ?? "/");
+            var state = authHelper.GetProtectedState(authProps);
+            return BuildGoogleOAuthChallengeUrl(redirectUrl, state);
         }
 
         public async Task<ReturnUrlResult> HandleOAuthExchangeCode(
@@ -68,28 +63,24 @@ namespace AbcLeaves.BasicMvcClient.Domain
             {
                 return ReturnUrlResult.Fail($"{nameof(state)} parameter is required");
             }
-            return await OperationFlow<ReturnUrlResult>
-                .BeginWith(() => authHelper.TestCrossSiteRequestForgery(state))
-                .ProceedWithClosure(testCsrf => testCsrf
-                    .ProceedWith(x => leavesApiClient.GrantGoogleApisAccess(code, redirectUrl))
-                    .EndWith(x => {
-                        var authProps = testCsrf.Current.AuthProperties;
-                        var returnUrl = authProps.Items["returnUrl"] ?? "/";
-                        return ReturnUrlResult.Success(returnUrl);
-                    }))
-                .Return();
+
+            var authPropsResult = await authHelper.TestCrossSiteRequestForgery(state);
+            if (!authPropsResult.Succeeded)
+            {
+                return ReturnUrlResult.Fail("Failed to test CSRF");
+            }
+
+            var x = await leavesApiClient.GrantGoogleApisAccess(code, redirectUrl);
+            var authProps = authPropsResult.AuthProperties;
+            var returnUrl = authProps.Items["returnUrl"] ?? "/";
+            return ReturnUrlResult.Succeed(returnUrl);
         }
 
         private ReturnUrlResult BuildGoogleOAuthChallengeUrl(string redirectUrl, string state)
         {
-            if (String.IsNullOrEmpty(redirectUrl))
-            {
-                throw new ArgumentNullException(nameof(redirectUrl));
-            }
-            if (String.IsNullOrEmpty(state))
-            {
-                throw new ArgumentNullException(nameof(state));
-            }
+            Throw.IfNullOrEmpty(redirectUrl, nameof(redirectUrl));
+            Throw.IfNullOrEmpty(state, nameof(state));
+
             var challengeUrl = QueryHelpers.AddQueryString(
                 uri: options.AuthUri,
                 queryString: new Dictionary<string, string> {
@@ -102,7 +93,8 @@ namespace AbcLeaves.BasicMvcClient.Domain
                     ["include_granted_scopes"] = "true",
                     ["state"] = state
                 });
-            return ReturnUrlResult.Success(challengeUrl);
+
+            return ReturnUrlResult.Succeed(challengeUrl);
         }
     }
 }

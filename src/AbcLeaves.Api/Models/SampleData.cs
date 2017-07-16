@@ -16,10 +16,10 @@ namespace AbcLeaves.Api.Models
                 .GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetService<AppDbContext>();
-                if (await dbContext.Database.EnsureCreatedAsync())
-                {
-                    await CreateAdminUsersAsync(serviceProvider);
-                }
+                await CreateAdminUsersAsync(serviceProvider);
+                // if (await dbContext.Database.EnsureCreatedAsync())
+                // {
+                // }
             }
         }
 
@@ -39,7 +39,10 @@ namespace AbcLeaves.Api.Models
                     var user = await userManager.FindByEmailAsync(adminEmail);
                     if (user == null)
                     {
-                        user = new AppUser { UserName = adminEmail, Email = adminEmail };
+                        user = new AppUser {
+                            Id = adminEmail,
+                            UserName = adminEmail
+                        };
                         await userManager.CreateAsync(user);
                         await userManager.AddClaimAsync(user, new Claim("ApproveLeaves", "Allowed"));
                         await userManager.AddClaimAsync(user, new Claim("DeclineLeaves", "Allowed"));

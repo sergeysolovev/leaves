@@ -8,7 +8,6 @@ using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
-using AbcLeaves.Core.Helpers;
 using AbcLeaves.BasicMvcClient.Domain;
 using Newtonsoft.Json;
 using AbcLeaves.Core;
@@ -40,16 +39,17 @@ namespace AbcLeaves.BasicMvcClient
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
             services.AddOptions();
-            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddTransient<IGoogleApisAuthManager, GoogleApisAuthManager>();
-            services.AddTransient<IMvcActionResultHelper, MvcActionResultHelper>();
+            services.AddTransient<GoogleApisAuthManager>();
+            services.AddTransient<AuthenticationManager>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient<IAuthenticationManager, AuthenticationManager>();
-            services.AddBackchannel<HttpClientHandler>();
-            services
-                .AddHttpApiClient<LeavesApiClient>(Configuration.GetSection("LeavesApi"))
-                .AddBearerTokenIdentification<HttpContextBearerTokenProvider>();
+
+            services.AddBackchannel();
+
+            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
+            services.Configure<LeavesApiClientOptions>(Configuration.GetSection("LeavesApi"));
+
+            services.AddTransient<LeavesApiClient>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -75,7 +75,7 @@ namespace AbcLeaves.BasicMvcClient
                 GetClaimsFromUserInfoEndpoint = false,
                 SaveTokens = true,
                 UseTokenLifetime = true,
-                //BackchannelHttpHandler = app.ApplicationServices.GetBackchannelHttpHandler(),
+                BackchannelHttpHandler = app.ApplicationServices.GetHttpMessageHandler(),
                 Events = new OpenIdConnectEvents()
                 {
                     OnTicketReceived = context => {
