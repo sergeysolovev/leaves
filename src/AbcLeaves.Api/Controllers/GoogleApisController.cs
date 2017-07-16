@@ -10,18 +10,18 @@ namespace AbcLeaves.Api.Controllers
     [Authorize(ActiveAuthenticationSchemes = "Bearer")]
     public class GoogleApisController : Controller
     {
-        private readonly GoogleApisAuthManager googleApisAuthManager;
+        private readonly GoogleCalendarManager googleCalManager;
 
-        public GoogleApisController(GoogleApisAuthManager googleApisAuthManager)
+        public GoogleApisController(GoogleCalendarManager googleCalManager)
         {
-            this.googleApisAuthManager = googleApisAuthManager;
+            this.googleCalManager = googleCalManager;
         }
 
         // GET /api/googleapis/
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await googleApisAuthManager.VerifyAccess(HttpContext.User);
+            var result = await googleCalManager.VerifyAccess(HttpContext.User);
             return result.ToMvcActionResult();
         }
 
@@ -31,7 +31,7 @@ namespace AbcLeaves.Api.Controllers
             [FromQuery]string code,
             [FromQuery]string redirectUrl)
         {
-            var result = await googleApisAuthManager.GrantAccess(code, redirectUrl, HttpContext.User);
+            var result = await googleCalManager.GrantAccess(code, redirectUrl, HttpContext.User);
             return result.ToMvcActionResult();
         }
     }

@@ -86,7 +86,6 @@ namespace AbcLeaves.Api
             services.AddTransient<UserManager>();
             services.AddTransient<LeavesManager>();
             services.AddTransient<GoogleCalendarManager>();
-            services.AddTransient<GoogleApisAuthManager>();
 
             services.AddOptions();
             services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
