@@ -44,7 +44,14 @@ namespace AbcLeaves.Api.Domain
             }
             try
             {
+                var publishContract = mapper.Map<Leave, PublishUserEventContract>(leave);
+                var eventUrl = await googleCalendarManager.PublishUserEventAsync(
+                    publishContract
+                );
+
                 leave.Status = LeaveStatus.Approved;
+                leave.GoogleCalendarLink = eventUrl;
+
                 await leavesRepository.UpdateAsync(leave);
             }
             catch (DbUpdateConcurrencyException)
@@ -54,8 +61,6 @@ namespace AbcLeaves.Api.Domain
                 );
             }
 
-            var publishContract = mapper.Map<Leave, PublishUserEventContract>(leave);
-            var shareResult = await googleCalendarManager.PublishUserEventAsync(publishContract);
             return LeaveResult.Succeed();
         }
 

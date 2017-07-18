@@ -25,9 +25,8 @@ namespace AbcLeaves.Api.Services
             this.backchannel = factory.Create(baseUrl);
         }
 
-        public async Task<StringResult> AddEventAsync(AddCalendarEventContract eventContract)
+        public async Task<string> AddEventAsync(AddCalendarEventContract eventContract)
         {
-            var error = "Failed to add an event to Google Calendar";
             var calendarEvent = mapper.Map<AddCalendarEventContract, CalendarEvent>(eventContract);
 
             var json = JsonConvert.SerializeObject(calendarEvent, new JsonSerializerSettings {
@@ -41,14 +40,14 @@ namespace AbcLeaves.Api.Services
 
             if (!result.Succeeded)
             {
-                return StringResult.Fail(error);
+                return null;
             }
 
             var response = result.Response;
 
             if (!response.IsSuccessStatusCode)
             {
-                return StringResult.Fail(error);
+                return null;
             }
 
             return GetEventUriFromJson(
@@ -56,13 +55,13 @@ namespace AbcLeaves.Api.Services
             );
         }
 
-        private StringResult GetEventUriFromJson(string json)
+        private string GetEventUriFromJson(string json)
         {
             try
             {
                 var jsonObject = JObject.Parse(json);
                 var eventUri = jsonObject.Value<string>("htmlLink");
-                return StringResult.Succeed(eventUri);
+                return eventUri;
             }
             catch (JsonException)
             {

@@ -27,7 +27,7 @@ namespace AbcLeaves.Api.Domain
             this.googleCalendarClient = Throw.IfNull(googleCalendarClient, nameof(googleCalendarClient));
         }
 
-        public async Task<StringResult> PublishUserEventAsync(PublishUserEventContract eventContract)
+        public async Task<string> PublishUserEventAsync(PublishUserEventContract eventContract)
         {
             Throw.IfNull(eventContract, nameof(eventContract));
 
@@ -35,25 +35,19 @@ namespace AbcLeaves.Api.Domain
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return StringResult.Fail(
-                    "An error occurred when publishing an event to Google Calendar"
-                );
+                return null;
             }
 
             var refreshToken = await userManager.GetRefreshTokenAsync(user);
             if (refreshToken == null)
             {
-                return StringResult.Fail(
-                    "An error occurred when publishing an event to Google Calendar"
-                );
+                return null;
             }
 
             var exchangeResult = await googleAuthClient.ExchangeRefreshToken(refreshToken);
             if (!exchangeResult.Succeeded)
             {
-                return StringResult.Fail(
-                    "An error occurred when publishing an event to Google Calendar"
-                );
+                return null;
             }
 
             var accessToken = exchangeResult.AccessToken;
@@ -61,16 +55,8 @@ namespace AbcLeaves.Api.Domain
                 eventContract,
                 opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken)
             );
-            var eventAddResult = await googleCalendarClient.AddEventAsync(addEventContract);
-            if (!eventAddResult.Succeeded)
-            {
-                return StringResult.Fail(
-                    "An error occurred when publishing an event to Google Calendar"
-                );
-            }
 
-            var eventUri = eventAddResult.Value;
-            return StringResult.Succeed(eventUri);
+            return await googleCalendarClient.AddEventAsync(addEventContract);
         }
 
         public async Task<VerifyAccessResult> GrantAccess(

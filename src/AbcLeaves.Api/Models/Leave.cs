@@ -11,5 +11,6 @@ namespace AbcLeaves.Api.Models
         public string UserId { get; set; }
         public AppUser User { get; set; }
         public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
+        public string GoogleCalendarLink { get; set; }
     }
 }
