@@ -6,41 +6,24 @@ using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class LeaveApplyResult : OperationResultBase
+    public class LeaveApplyResult : OperationResult<Leave>
     {
         [JsonIgnore]
-        public Leave Leave { get; private set; }
+        public Leave Leave => base.Value;
         public int? LeaveId => Leave?.Id;
 
-        public LeaveApplyResult() : base()
+        protected LeaveApplyResult(Leave leave) : base(leave)
         {
         }
 
-        protected LeaveApplyResult(Leave leave) : base(true)
-        {
-            if (leave == null)
-            {
-                throw new ArgumentNullException(nameof(leave));
-            }
-            Leave = leave;
-        }
-
-        protected LeaveApplyResult(string error, Dictionary<string, object> details)
-            : base(error, details)
+        protected LeaveApplyResult(string error) : base(error)
         {
         }
 
-        protected LeaveApplyResult(IOperationResult result)
-            : base(result)
-        {
-        }
+        public static LeaveApplyResult Success(Leave leave)
+            => new LeaveApplyResult(leave);
 
-        public static LeaveApplyResult Success(Leave leave) => new LeaveApplyResult(leave);
-
-        public static LeaveApplyResult Fail(string error, Dictionary<string, object> details)
-            => new LeaveApplyResult(error, details);
-
-        public static LeaveApplyResult FailFrom(IOperationResult result)
-            => new LeaveApplyResult(result);
+        public static LeaveApplyResult Fail(string error)
+            => new LeaveApplyResult(error);
     }
 }

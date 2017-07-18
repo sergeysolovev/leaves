@@ -1,20 +1,25 @@
-﻿using System.Collections.Generic;
-
-namespace AbcLeaves.Core
+﻿namespace AbcLeaves.Core
 {
-    // todo: implement non-generic context for IOperationResult
     public interface IOperationResult
     {
         bool Succeeded { get; }
-        string ErrorMessage { get; }
-        Dictionary<string, object> Details { get; }
-        void FailFrom(IOperationResult result);
+        Failure Failure { get; }
     }
 
-    public interface IOperationResult<TContext> : IOperationResult
-        where TContext : IOperationContext
+    public abstract class OperationResult : IOperationResult
     {
-        TContext Context { get; set; }
-        void Succeed(TContext Context);
+        public bool Succeeded => (Failure == null);
+        public Failure Failure { get; private set; }
+        protected OperationResult() { }
+        protected OperationResult(Failure failure) => Failure = failure;
+        protected OperationResult(string error) : this(new Failure(error)) { }
+    }
+
+    public abstract class OperationResult<T> : OperationResult
+    {
+        protected T Value { get; private set; }
+        protected OperationResult(T value) => Value = value;
+        protected OperationResult(Failure failure) : base(failure) { }
+        protected OperationResult(string error) : base(error) { }
     }
 }

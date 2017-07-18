@@ -4,7 +4,7 @@ using AbcLeaves.Api.Models;
 
 namespace AbcLeaves.Api.Repositories
 {
-    public class LeavesRepository: ILeavesRepository
+    public class LeavesRepository
     {
         private readonly AppDbContext dbContext;
 

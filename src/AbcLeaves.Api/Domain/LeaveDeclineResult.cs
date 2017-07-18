@@ -3,18 +3,19 @@ using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class LeaveDeclineResult : OperationResultBase, INotFoundOperationResult
+    public class LeaveDeclineResult : OperationResult, IFindResult
     {
         [JsonIgnore]
         public bool NotFound { get; protected set; }
 
-        public LeaveDeclineResult(bool succeeded) : base(succeeded) {}
-        protected LeaveDeclineResult(string error) : base(error, null) {}
-        protected LeaveDeclineResult(IOperationResult result) : base(result) {}
+        public LeaveDeclineResult() : base() { }
+        protected LeaveDeclineResult(string error) : base(error) { }
 
-        public static LeaveDeclineResult Success => new LeaveDeclineResult(true);
+        public static LeaveDeclineResult Success
+            => new LeaveDeclineResult();
 
-        public static LeaveDeclineResult Fail(string error) => new LeaveDeclineResult(error);
+        public static LeaveDeclineResult Fail(string error)
+            => new LeaveDeclineResult(error);
 
         public static LeaveDeclineResult FailNotFound(int leaveId)
         {

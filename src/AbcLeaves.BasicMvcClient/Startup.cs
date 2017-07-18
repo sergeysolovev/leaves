@@ -8,10 +8,9 @@ using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
-using AbcLeaves.Core.Helpers;
-using AbcLeaves.BasicMvcClient.Domain;
 using Newtonsoft.Json;
 using AbcLeaves.Core;
+using AbcLeaves.BasicMvcClient.Helpers;
 
 namespace AbcLeaves.BasicMvcClient
 {
@@ -31,6 +30,10 @@ namespace AbcLeaves.BasicMvcClient
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            // mvc:
             services
                 .AddMvc()
                 .AddJsonOptions(options => {
@@ -39,17 +42,21 @@ namespace AbcLeaves.BasicMvcClient
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
-            services.AddOptions();
-            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
-            services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddTransient<IGoogleApisAuthManager, GoogleApisAuthManager>();
-            services.AddTransient<IMvcActionResultHelper, MvcActionResultHelper>();
+
+            // authentication:
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient<IAuthenticationManager, AuthenticationManager>();
-            services.AddBackchannel<HttpClientHandler>();
-            services
-                .AddHttpApiClient<LeavesApiClient>(Configuration.GetSection("LeavesApi"))
-                .AddBearerTokenIdentification<HttpContextBearerTokenProvider>();
+            services.AddTransient<AuthHelper>();
+
+            // google oauth:
+            services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
+            services.AddTransient<GoogleOAuthHelper>();
+
+            // api client:
+            services.Configure<ApiOptions>(Configuration.GetSection("LeavesApi"));
+            services.AddTransient<ApiClient>();
+
+            // backchannel:
+            services.AddBackchannel();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -75,7 +82,7 @@ namespace AbcLeaves.BasicMvcClient
                 GetClaimsFromUserInfoEndpoint = false,
                 SaveTokens = true,
                 UseTokenLifetime = true,
-                //BackchannelHttpHandler = app.ApplicationServices.GetBackchannelHttpHandler(),
+                BackchannelHttpHandler = app.ApplicationServices.GetHttpMessageHandler(),
                 Events = new OpenIdConnectEvents()
                 {
                     OnTicketReceived = context => {
