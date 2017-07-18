@@ -18,6 +18,7 @@
     public abstract class OperationResult<T> : OperationResult
     {
         protected T Value { get; private set; }
+        protected OperationResult() { }
         protected OperationResult(T value) => Value = value;
         protected OperationResult(Failure failure) : base(failure) { }
         protected OperationResult(string error) : base(error) { }

@@ -22,23 +22,25 @@ namespace AbcLeaves.Api.Domain
             this.googleCalendarManager = googleCalendarManager;
         }
 
-        public async Task<LeaveApplyResult> ApplyAsync(ApplyLeaveContract leaveContract)
+        public async Task<LeaveResult> ApplyAsync(ApplyLeaveContract leaveContract)
         {
             var leave = mapper.Map<ApplyLeaveContract, Leave>(leaveContract);
             await leavesRepository.InsertAsync(leave);
-            return LeaveApplyResult.Success(leave);
+            return LeaveResult.Succeed(leave);
         }
 
-        public async Task<LeaveApproveResult> ApproveAsync(int leaveId)
+        public async Task<LeaveResult> ApproveAsync(int leaveId)
         {
             var leave = leavesRepository.GetById(leaveId);
             if (leave == null)
             {
-                return LeaveApproveResult.FailNotFound(leaveId);
+                return LeaveResult.FailNotFound(leaveId);
             }
             if (leave.Status == LeaveStatus.Approved)
             {
-                return LeaveApproveResult.Fail($"Leave id={leaveId} has already been approved");
+                return LeaveResult.Fail(
+                    $"Leave id={leaveId} has already been approved"
+                );
             }
             try
             {
@@ -47,31 +49,35 @@ namespace AbcLeaves.Api.Domain
             }
             catch (DbUpdateConcurrencyException)
             {
-                return LeaveApproveResult.Fail($"Leave id={leaveId} is being updated by another user");
+                return LeaveResult.Fail(
+                    $"Leave id={leaveId} is being updated by another user"
+                );
             }
 
             var publishContract = mapper.Map<Leave, PublishUserEventContract>(leave);
             var shareResult = await googleCalendarManager.PublishUserEventAsync(publishContract);
-            return LeaveApproveResult.Success(shareResult);
+            return LeaveResult.Succeed();
         }
 
-        public async Task<LeaveDeclineResult> DeclineAsync(int leaveId)
+        public async Task<LeaveResult> DeclineAsync(int leaveId)
         {
             var leave = leavesRepository.GetById(leaveId);
             if (leave == null)
             {
-                return LeaveDeclineResult.FailNotFound(leaveId);
+                return LeaveResult.FailNotFound(leaveId);
             }
             if (leave.Status == LeaveStatus.Approved)
             {
-                return LeaveDeclineResult.Fail(
+                return LeaveResult.Fail(
                     $"Cannot decline leave id={leaveId} " +
                     "that has already been approved"
                 );
             }
             if (leave.Status == LeaveStatus.Declined)
             {
-                return LeaveDeclineResult.Fail($"Leave id={leaveId} has already been declined");
+                return LeaveResult.Fail(
+                    $"Leave id={leaveId} has already been declined"
+                );
             }
             try
             {
@@ -80,9 +86,11 @@ namespace AbcLeaves.Api.Domain
             }
             catch (DbUpdateConcurrencyException)
             {
-                return LeaveDeclineResult.Fail($"Leave id={leaveId} is being updated by another user");
+                return LeaveResult.Fail(
+                    $"Leave id={leaveId} is being updated by another user"
+                );
             }
-            return LeaveDeclineResult.Success;
+            return LeaveResult.Succeed();
         }
     }
 }
