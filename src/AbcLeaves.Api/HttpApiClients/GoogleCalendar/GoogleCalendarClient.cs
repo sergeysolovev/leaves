@@ -25,17 +25,17 @@ namespace AbcLeaves.Api.Services
             this.backchannel = factory.Create(baseUrl);
         }
 
-        public async Task<StringResult> AddEventAsync(CalendarEventAddDto eventDto)
+        public async Task<StringResult> AddEventAsync(AddCalendarEventContract eventContract)
         {
             var error = "Failed to add an event to Google Calendar";
-            var calendarEvent = mapper.Map<CalendarEventAddDto, CalendarEvent>(eventDto);
+            var calendarEvent = mapper.Map<AddCalendarEventContract, CalendarEvent>(eventContract);
 
             var json = JsonConvert.SerializeObject(calendarEvent, new JsonSerializerSettings {
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc
             });
 
             var result = await backchannel.PostAsync("calendars/primary/events", x => x
-                .WithBearerToken(eventDto.AccessToken)
+                .WithBearerToken(eventContract.AccessToken)
                 .WithJsonContent(json)
             );
 

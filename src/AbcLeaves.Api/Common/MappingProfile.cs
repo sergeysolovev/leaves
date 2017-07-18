@@ -9,22 +9,19 @@ namespace AbcLeaves.Api
     {
         public MappingProfile()
         {
-            CreateMap<LeavePostDto, LeaveApplyDto>();
-            CreateMap<LeaveApplyDto, Leave>();
-            CreateMap<UserEventPublishDto, CalendarEventAddDto>();
-            CreateMap<Leave, UserEventPublishDto>().AfterMap((src, dst) => {
+            CreateMap<PostLeaveContract, ApplyLeaveContract>();
+            CreateMap<ApplyLeaveContract, Leave>();
+            CreateMap<PublishUserEventContract, AddCalendarEventContract>();
+            CreateMap<Leave, PublishUserEventContract>().AfterMap((src, dst) => {
                 dst.Title = LeaveEventDefaults.Title;
                 dst.Description = LeaveEventDefaults.Description;
             });
-
-            CreateMap<CalendarEventAddDto, CalendarEvent>().AfterMap((src, dst) =>
+            CreateMap<AddCalendarEventContract, CalendarEvent>().AfterMap((src, dst) =>
                 dst.Summary = src.Title
             );
-
             CreateMap<DateTime, CalendarEventDateTime>()
-                .ConstructUsing(dateTime => new CalendarEventDateTime(dateTime));
-
-            //CreateMap<CalendarEventAddDto, CalendarEvent>();
+                .ConstructUsing(dateTime => new CalendarEventDateTime(dateTime)
+            );
         }
     }
 }

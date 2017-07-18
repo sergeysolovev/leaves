@@ -2,7 +2,7 @@
 
 namespace AbcLeaves.Api
 {
-    public class UserEventPublishDto
+    public class PublishUserEventContract
     {
         public string UserId { get; set; }
         public DateTime Start { get; set; }

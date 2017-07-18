@@ -2,7 +2,7 @@
 
 namespace AbcLeaves.Api
 {
-    public class LeaveApplyDto
+    public class ApplyLeaveContract
     {
         public DateTime Start { get; set; }
         public DateTime End { get; set; }

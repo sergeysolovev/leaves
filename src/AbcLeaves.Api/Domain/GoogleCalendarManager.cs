@@ -27,11 +27,11 @@ namespace AbcLeaves.Api.Domain
             this.googleCalendarClient = Throw.IfNull(googleCalendarClient, nameof(googleCalendarClient));
         }
 
-        public async Task<StringResult> PublishUserEventAsync(UserEventPublishDto userEvent)
+        public async Task<StringResult> PublishUserEventAsync(PublishUserEventContract eventContract)
         {
-            Throw.IfNull(userEvent, nameof(userEvent));
+            Throw.IfNull(eventContract, nameof(eventContract));
 
-            var userId = userEvent.UserId;
+            var userId = eventContract.UserId;
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
@@ -57,11 +57,11 @@ namespace AbcLeaves.Api.Domain
             }
 
             var accessToken = exchangeResult.AccessToken;
-            var eventAddDto = mapper.Map<UserEventPublishDto, CalendarEventAddDto>(
-                userEvent,
+            var addEventContract = mapper.Map<PublishUserEventContract, AddCalendarEventContract>(
+                eventContract,
                 opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken)
             );
-            var eventAddResult = await googleCalendarClient.AddEventAsync(eventAddDto);
+            var eventAddResult = await googleCalendarClient.AddEventAsync(addEventContract);
             if (!eventAddResult.Succeeded)
             {
                 return StringResult.Fail(

@@ -22,9 +22,9 @@ namespace AbcLeaves.Api.Domain
             this.googleCalendarManager = googleCalendarManager;
         }
 
-        public async Task<LeaveApplyResult> ApplyAsync(LeaveApplyDto leaveDto)
+        public async Task<LeaveApplyResult> ApplyAsync(ApplyLeaveContract leaveContract)
         {
-            var leave = mapper.Map<LeaveApplyDto, Leave>(leaveDto);
+            var leave = mapper.Map<ApplyLeaveContract, Leave>(leaveContract);
             await leavesRepository.InsertAsync(leave);
             return LeaveApplyResult.Success(leave);
         }
@@ -50,8 +50,8 @@ namespace AbcLeaves.Api.Domain
                 return LeaveApproveResult.Fail($"Leave id={leaveId} is being updated by another user");
             }
 
-            var eventPublishDto = mapper.Map<Leave, UserEventPublishDto>(leave);
-            var shareResult = await googleCalendarManager.PublishUserEventAsync(eventPublishDto);
+            var publishContract = mapper.Map<Leave, PublishUserEventContract>(leave);
+            var shareResult = await googleCalendarManager.PublishUserEventAsync(publishContract);
             return LeaveApproveResult.Success(shareResult);
         }
 

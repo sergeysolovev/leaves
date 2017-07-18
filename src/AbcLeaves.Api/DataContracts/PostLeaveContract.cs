@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AbcLeaves.Api
 {
-    public class LeavePostDto
+    public class PostLeaveContract
     {
         [Required, UtcDate]
         public DateTime? Start { get; set; }

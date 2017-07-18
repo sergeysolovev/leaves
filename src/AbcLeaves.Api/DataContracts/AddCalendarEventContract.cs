@@ -2,7 +2,7 @@
 
 namespace AbcLeaves.Api
 {
-    public class CalendarEventAddDto
+    public class AddCalendarEventContract
     {
         public string AccessToken { get; set; }
         public DateTime Start { get; set; }

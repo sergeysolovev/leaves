@@ -32,7 +32,7 @@ namespace AbcLeaves.Api.Controllers
         // POST api/leaves
         [HttpPost]
         [Authorize(Policy = "CanApplyLeaves")]
-        public async Task<IActionResult> Post([FromBody]LeavePostDto leaveDto)
+        public async Task<IActionResult> Post([FromBody]PostLeaveContract leaveContract)
         {
             if (!ModelState.IsValid)
             {
@@ -47,12 +47,12 @@ namespace AbcLeaves.Api.Controllers
                 return BadRequest();
             }
 
-            var leaveApplyDto = mapper.Map<LeavePostDto, LeaveApplyDto>(
-                leaveDto, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id)
+            var applyLeaveContract = mapper.Map<PostLeaveContract, ApplyLeaveContract>(
+                leaveContract, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id)
             );
 
             return await leavesManager
-                .ApplyAsync(leaveApplyDto)
+                .ApplyAsync(applyLeaveContract)
                 .ToMvcActionResultAsync();
         }
 
