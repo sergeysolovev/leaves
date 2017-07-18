@@ -29,8 +29,13 @@ namespace AbcLeaves.Api
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddCommandLine(Program.Args);
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            if (Program.Args != null)
+            {
+                builder.AddCommandLine(Program.Args);
+            }
+
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
