@@ -6,28 +6,20 @@ using AbcLeaves.Core;
 
 namespace AbcLeaves.Api.Controllers
 {
-    [Route("api/googleapis")]
+    [Route("api/auth")]
     [Authorize(ActiveAuthenticationSchemes = "Bearer")]
-    public class GoogleApisController : Controller
+    public class AuthController : Controller
     {
         private readonly GoogleCalendarManager googleCalManager;
 
-        public GoogleApisController(GoogleCalendarManager googleCalManager)
+        public AuthController(GoogleCalendarManager googleCalManager)
         {
             this.googleCalManager = googleCalManager;
         }
 
-        // GET /api/googleapis/
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var result = await googleCalManager.VerifyAccess(HttpContext.User);
-            return result.ToMvcActionResult();
-        }
-
-        // PATCH /api/googleapis/
-        [HttpPatch]
-        public async Task<IActionResult> Patch(
+        // POST /api/auth/googlecal/
+        [HttpPost("googlecal")]
+        public async Task<IActionResult> GrantAccessToGoogleCalendar(
             [FromQuery]string code,
             [FromQuery]string redirectUrl)
         {

@@ -129,11 +129,5 @@ namespace AbcLeaves.Api.Services
 
             return ExchangeRefreshTokenResult.Success(accessToken);
         }
-
-        public async Task<VerifyAccessResult> ValidateRefreshTokenAsync(string refreshToken)
-        {
-            // todo: implement validation
-            return VerifyAccessResult.Succeed(isForbidden: false);
-        }
     }
 }

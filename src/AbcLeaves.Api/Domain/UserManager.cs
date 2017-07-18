@@ -44,22 +44,6 @@ namespace AbcLeaves.Api.Domain
         public string GetSubjectClaim(ClaimsPrincipal principal)
             => principal.FindFirstValue("sub");
 
-        public async Task<bool> HasPersistentClaim(ClaimsPrincipal principal,
-            string claimType, string requiredValue)
-        {
-            Throw.IfNull(principal, nameof(principal));
-            Throw.IfNullOrEmpty(claimType, nameof(claimType));
-
-            var user = await GetUserAsync(principal);
-            if (user == null)
-            {
-                return false;
-            }
-
-            var userClaims = await GetClaimsAsync(user);
-            return userClaims.Any(c => c.Type == claimType && c.Value == requiredValue);
-        }
-
         public async Task<IdentityResult> SetRefreshTokenAsync(AppUser user, string token)
             => await SetAuthenticationTokenAsync(user, "Google", "refresh_token", token);
 

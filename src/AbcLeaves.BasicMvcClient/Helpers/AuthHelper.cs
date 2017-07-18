@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 
-namespace AbcLeaves.BasicMvcClient.Domain
+namespace AbcLeaves.BasicMvcClient.Helpers
 {
-    public class AuthenticationManager
+    public class AuthHelper
     {
         private readonly HttpContext httpContext;
         private readonly IDataProtectionProvider dataProtectionProvider;
 
-        public AuthenticationManager(
+        public AuthHelper(
             IHttpContextAccessor httpContextAccessor,
             IDataProtectionProvider dataProtectionProvider)
         {
@@ -40,27 +40,13 @@ namespace AbcLeaves.BasicMvcClient.Domain
             return authProps.GetTokenValue("id_token");
         }
 
-        public async Task<AuthPropertiesResult> TestCrossSiteRequestForgery(string state)
-        {
-            var authProps = UnprotectState(state);
-            var idTokenFromState = authProps.GetTokenValue("id_token");
-            var idTokenFromCookies = await GetIdTokenAsync();
-            if (!String.Equals(idTokenFromState, idTokenFromCookies, StringComparison.Ordinal))
-            {
-                return AuthPropertiesResult.Fail(
-                    "id_token from cookies and state don't match"
-                );
-            }
-            return AuthPropertiesResult.Success(authProps);
-        }
-
-        public string GetProtectedState(AuthenticationProperties authProperties)
+        public string ProtectState(AuthenticationProperties authProperties)
         {
             var stateDataFormat = CreateStateDataFormat();
             return stateDataFormat.Protect(authProperties);
         }
 
-        private AuthenticationProperties UnprotectState(string state)
+        public AuthenticationProperties UnprotectState(string state)
         {
             var stateDataFormat = CreateStateDataFormat();
             return stateDataFormat.Unprotect(state);

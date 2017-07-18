@@ -47,13 +47,19 @@ namespace AbcLeaves.Api
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
 
+            // Authorization:
+            services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, HasPersistentTokenAuthorizationHandler>();
             services.AddAuthorization(options => {
-                options.AddPolicy("CanApproveLeaves",
-                    policyBuilder => policyBuilder.AddRequirements(
-                        new HasPersistentClaimRequirement("ApproveLeaves", "Allowed")));
-                options.AddPolicy("CanDeclineLeaves",
-                    policyBuilder => policyBuilder.AddRequirements(
-                        new HasPersistentClaimRequirement("DeclineLeaves", "Allowed")));
+                options.AddPolicy("CanApplyLeaves", policyBuilder => policyBuilder
+                    .AddRequirements(new HasPersistentTokenRequirement("Google", "refresh_token"))
+                );
+                options.AddPolicy("CanApproveLeaves", policyBuilder => policyBuilder
+                    .AddRequirements(new HasPersistentClaimRequirement("ApproveLeaves", "Allowed"))
+                );
+                options.AddPolicy("CanDeclineLeaves", policyBuilder => policyBuilder
+                    .AddRequirements(new HasPersistentClaimRequirement("DeclineLeaves", "Allowed"))
+                );
             });
 
             services.AddDbContext<AppDbContext>(options =>
@@ -75,8 +81,6 @@ namespace AbcLeaves.Api
             services.AddAutoMapper();
 
             services.AddSingleton<IConfiguration>(Configuration);
-
-            services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
 
             services.AddTransient<ModelStateHelper>();
 

@@ -1,6 +1,6 @@
 namespace AbcLeaves.BasicMvcClient
 {
-    public class LeavesApiClientOptions
+    public class ApiOptions
     {
         public string BaseUrl { get; set; }
     }

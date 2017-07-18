@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace AbcLeaves.BasicMvcClient
+namespace AbcLeaves.BasicMvcClient.DataContracts
 {
     public class CreateLeaveContract
     {

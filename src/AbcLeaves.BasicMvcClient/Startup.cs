@@ -8,9 +8,9 @@ using System.Net.Http;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
-using AbcLeaves.BasicMvcClient.Domain;
 using Newtonsoft.Json;
 using AbcLeaves.Core;
+using AbcLeaves.BasicMvcClient.Helpers;
 
 namespace AbcLeaves.BasicMvcClient
 {
@@ -30,6 +30,10 @@ namespace AbcLeaves.BasicMvcClient
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            // mvc:
             services
                 .AddMvc()
                 .AddJsonOptions(options => {
@@ -38,18 +42,21 @@ namespace AbcLeaves.BasicMvcClient
                     options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 });
-            services.AddOptions();
-            services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddTransient<GoogleApisAuthManager>();
-            services.AddTransient<AuthenticationManager>();
+
+            // authentication:
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<AuthHelper>();
 
-            services.AddBackchannel();
-
+            // google oauth:
             services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
-            services.Configure<LeavesApiClientOptions>(Configuration.GetSection("LeavesApi"));
+            services.AddTransient<GoogleOAuthHelper>();
 
-            services.AddTransient<LeavesApiClient>();
+            // api client:
+            services.Configure<ApiOptions>(Configuration.GetSection("LeavesApi"));
+            services.AddTransient<ApiClient>();
+
+            // backchannel:
+            services.AddBackchannel();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

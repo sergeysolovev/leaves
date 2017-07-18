@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using AbcLeaves.Api.Domain;
 using Microsoft.AspNetCore.Authorization;
 
@@ -21,12 +22,23 @@ namespace AbcLeaves.Api
             {
                 context.Fail();
             }
-            var hasClaim = await userManager.HasPersistentClaim(principal,
-                requirement.ClaimType, requirement.RequiredValue);
+
+            var user = await userManager.GetOrCreateUserAsync(principal);
+            if (user == null)
+            {
+                context.Fail();
+            }
+
+            var userClaims = await userManager.GetClaimsAsync(user);
+            var hasClaim = userClaims.Any(c =>
+                c.Type == requirement.ClaimType &&
+                c.Value == requirement.RequiredValue
+            );
             if (!hasClaim)
             {
                 context.Fail();
             }
+
             context.Succeed(requirement);
         }
     }

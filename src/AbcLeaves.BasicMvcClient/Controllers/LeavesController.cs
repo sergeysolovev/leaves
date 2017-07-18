@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
-using AbcLeaves.BasicMvcClient.Domain;
+using AbcLeaves.BasicMvcClient.DataContracts;
+using AbcLeaves.BasicMvcClient.Helpers;
 using AbcLeaves.Core;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,22 +14,90 @@ namespace AbcLeaves.BasicMvcClient.Controllers
     [Authorize(ActiveAuthenticationSchemes = "GoogleOpenIdConnect")]
     public class LeavesController : Controller
     {
-        private readonly LeavesApiClient leavesApiClient;
-        private readonly AuthenticationManager authManager;
+        private readonly ApiClient apiClient;
+        private readonly AuthHelper authHelper;
+        private readonly GoogleOAuthHelper googleOAuthHelper;
 
         public LeavesController(
-            LeavesApiClient leavesApiClient,
-            AuthenticationManager authHelper)
+            ApiClient apiClient,
+            AuthHelper authHelper,
+            GoogleOAuthHelper googleOAuthHelper)
         {
-            this.authManager = authHelper;
-            this.leavesApiClient = leavesApiClient;
+            this.authHelper = authHelper;
+            this.apiClient = apiClient;
+            this.googleOAuthHelper = googleOAuthHelper;
+        }
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return Ok("Here goes the list of leaves for the current user...");
+        }
+
+        [HttpGet("apply/{start}/{end}")]
+        public async Task<IActionResult> Create(DateTime start, DateTime end)
+        {
+            var leave = new CreateLeaveContract {
+                Start = ConvertToUtc(start),
+                End = ConvertToUtc(end)
+            };
+
+            var applyLeaveResult = await apiClient.ApplyLeaveAsync(leave);
+            if (applyLeaveResult.Response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return BadRequest();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST /leaves
+        [HttpPost]
+        public async Task<IActionResult> Create([FromForm]CreateLeaveContract leave)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            leave.Start = ConvertToUtc(leave.Start);
+            leave.End = ConvertToUtc(leave.End);
+
+            var apiResult = await apiClient.ApplyLeaveAsync(leave);
+            if (apiResult.Response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                var returnUrl = Url.Action(
+                    action: nameof(Create),
+                    values: new {
+                        start = leave.Start.ToString("O"),
+                        end = leave.End.ToString("O")
+                    }
+                );
+
+                var redirectUrl = Url.Action(nameof(AcceptAccessCode), null, null, Request.Scheme);
+                var authProps = await authHelper.GetAuthenticationPropertiesAsync();
+                authProps.Items.Add("returnUrl", returnUrl);
+                var state = authHelper.ProtectState(authProps);
+                var challengeUrl = googleOAuthHelper.BuildChallengeUrl(redirectUrl, state);
+
+                return Redirect(challengeUrl);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET /leaves/new
+        [HttpGet("new")]
+        public IActionResult New()
+        {
+            return View();
         }
 
         // GET /leaves/approve/{id}
         [HttpGet("approve/{id}")]
         public async Task<IActionResult> ApproveLeave(string id)
         {
-            var result = await leavesApiClient.ApproveLeaveAsync(id);
+            var result = await apiClient.ApproveLeaveAsync(id);
             return new ObjectResult(result);
         }
 
@@ -34,11 +105,70 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         [HttpGet("decline/{id}")]
         public async Task<IActionResult> DeclineLeave(string id)
         {
-            var result = await leavesApiClient.DeclineLeaveAsync(id);
+            var result = await apiClient.DeclineLeaveAsync(id);
             return new ObjectResult(result);
         }
 
-        // todo: get rid of this
+        // GET /leaves/auth/googlecal/
+        [HttpGet("auth/googlecal")]
+        public async Task<IActionResult> AcceptAccessCode(
+            [FromQuery]string code = null,
+            [FromQuery]string state = null,
+            [FromQuery]string error = null)
+        {
+            if (error != null)
+            {
+                return BadRequest($"Failed to grant access to Google Calendar: {error}");
+            }
+            if (code == null)
+            {
+                return BadRequest("Failed to grant access to Google Calendar");
+            }
+
+            var authProps = authHelper.UnprotectState(state);
+            if (authProps == null)
+            {
+                return BadRequest("Failed to grant access to Google Calendar");
+            }
+
+            // RFC 6749 10.12
+            if (!await TestCrossSiteRequestForgery())
+            {
+                return BadRequest("Failed to grant access to Google Calendar");
+            }
+
+            var redirectUrl = Url.Action(null, null, null, Request.Scheme);
+            var grantAccessResult = await apiClient.GrantAccessToGoogleCalendar(
+                code,
+                redirectUrl
+            );
+
+            if (!grantAccessResult.Response.IsSuccessStatusCode)
+            {
+                return BadRequest("Failed to grant access to Google Calendar");
+            }
+
+            var returnUrl = authProps.Items["returnUrl"];
+            if (String.IsNullOrEmpty(returnUrl))
+            {
+                return BadRequest("Failed to grant access to Google Calendar");
+            }
+
+            return Redirect(returnUrl);
+
+            async Task<bool> TestCrossSiteRequestForgery()
+            {
+                var idTokenFromState = authProps.GetTokenValue("id_token");
+                var idTokenFromCookies = await authHelper.GetIdTokenAsync();
+
+                return String.Equals(
+                    idTokenFromState,
+                    idTokenFromCookies,
+                    StringComparison.Ordinal
+                );
+            }
+        }
+
         private static DateTime ConvertToUtc(DateTime dateTime)
         {
             switch (dateTime.Kind)
@@ -50,63 +180,6 @@ namespace AbcLeaves.BasicMvcClient.Controllers
                 default:
                     return dateTime;
             }
-        }
-
-        // POST /leaves
-        [HttpPost]
-        public async Task<IActionResult> Create([FromForm]CreateLeaveContract leave)
-        {
-            if (ModelState.IsValid)
-            {
-                var verifyAccess = await leavesApiClient.VerifyGoogleApisAccess();
-                if (verifyAccess.Succeeded)
-                {
-                    leave.Start = ConvertToUtc(leave.Start);
-                    leave.End = ConvertToUtc(leave.End);
-                    var result = await leavesApiClient.ApplyLeaveAsync(leave);
-                    return Json(result);
-                }
-                return BadRequest(verifyAccess);
-            }
-            return BadRequest(ModelState);
-        }
-
-        // GET /leaves/new
-        [HttpGet("new")]
-        public async Task<IActionResult> New()
-        {
-            return await NewInternal(afterGranted: false);
-        }
-
-        // GET /leaves/new/aftergranted
-        [HttpGet("new/aftergranted")]
-        public async Task<IActionResult> NewAfterGranted()
-        {
-            return await NewInternal(afterGranted: true);
-        }
-
-        private async Task<IActionResult> NewInternal(bool afterGranted)
-        {
-            var verifyAccess = await leavesApiClient.VerifyGoogleApisAccess();
-
-            if (!verifyAccess.Succeeded)
-            {
-                return BadRequest(verifyAccess.Failure);
-            }
-
-            if (verifyAccess.IsForbidden && !afterGranted)
-            {
-                var returnUrl = Url.Action(nameof(NewAfterGranted));
-                var redirectUrl = Url.Action<GoogleApisController>(
-                    action: nameof(GoogleApisController.GrantAccess),
-                    values: new {
-                        returnUrl = returnUrl
-                    }
-                );
-                return Redirect(redirectUrl);
-            }
-
-            return View(nameof(New));
         }
     }
 }

@@ -31,6 +31,7 @@ namespace AbcLeaves.Api.Controllers
 
         // POST api/leaves
         [HttpPost]
+        [Authorize(Policy = "CanApplyLeaves")]
         public async Task<IActionResult> Post([FromBody]LeavePostDto leaveDto)
         {
             if (!ModelState.IsValid)
@@ -56,7 +57,7 @@ namespace AbcLeaves.Api.Controllers
         }
 
         // PATCH api/leaves/{id}/approve
-        [HttpPatchAttribute("{id}/approve")]
+        [HttpPatch("{id}/approve")]
         [Authorize(Policy = "CanApproveLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
         {
@@ -66,7 +67,7 @@ namespace AbcLeaves.Api.Controllers
         }
 
         // PATCH api/leaves/{id}/decline
-        [HttpPatchAttribute("{id}/decline")]
+        [HttpPatch("{id}/decline")]
         [Authorize(Policy = "CanDeclineLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
         {

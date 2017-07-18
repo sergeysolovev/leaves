@@ -1,4 +1,4 @@
-namespace AbcLeaves.BasicMvcClient.Domain
+namespace AbcLeaves.BasicMvcClient.Helpers
 {
     public class GoogleOAuthOptions
     {

@@ -5,20 +5,21 @@ using System;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
 using AbcLeaves.Core;
-using AbcLeaves.BasicMvcClient.Domain;
+using AbcLeaves.BasicMvcClient.Helpers;
+using AbcLeaves.BasicMvcClient.DataContracts;
 
 namespace AbcLeaves.BasicMvcClient
 {
-    public class LeavesApiClient
+    public class ApiClient
     {
         private const string ErrorMessage = "An error occurred when requesting leaves API";
         private readonly IBackchannel backchannel;
-        private readonly AuthenticationManager authHelper;
+        private readonly AuthHelper authHelper;
 
-        public LeavesApiClient(
-            IOptions<LeavesApiClientOptions> options,
+        public ApiClient(
+            IOptions<ApiOptions> options,
             IBackchannelFactory backchannelFactory,
-            AuthenticationManager authHelper)
+            AuthHelper authHelper)
         {
             this.authHelper = Throw.IfNull(authHelper, nameof(authHelper));
             this.backchannel = Throw
@@ -56,34 +57,11 @@ namespace AbcLeaves.BasicMvcClient
             );
         }
 
-        public async Task<VerifyAccessResult> VerifyGoogleApisAccess()
-        {
-            var idToken = await authHelper.GetIdTokenAsync();
-            var apiResult = await backchannel.GetAsync("googleapis/", x => x
-                .WithBearerToken(idToken)
-            );
-
-            if (!apiResult.Succeeded)
-            {
-                return VerifyAccessResult.Fail(ErrorMessage);
-            }
-
-            switch (apiResult.Response.StatusCode)
-            {
-                case HttpStatusCode.OK:
-                    return VerifyAccessResult.Succeed(isForbidden: false);
-                case HttpStatusCode.Forbidden:
-                    return VerifyAccessResult.Succeed(isForbidden: true);
-                default:
-                    return VerifyAccessResult.Fail(ErrorMessage);
-            }
-        }
-
-        public async Task<SendMessageResult> GrantGoogleApisAccess(
+        public async Task<SendMessageResult> GrantAccessToGoogleCalendar(
             string code, string redirectUrl)
         {
             var idToken = await authHelper.GetIdTokenAsync();
-            return await backchannel.PatchAsync("googleapis/", x => x
+            return await backchannel.PostAsync("auth/googlecal/", x => x
                 .WithBearerToken(idToken)
                 .AddParameter("code", code)
                 .AddParameter("redirectUrl", redirectUrl)
