@@ -7,7 +7,6 @@ using AbcLeaves.Core;
 namespace AbcLeaves.Api.Controllers
 {
     [Route("api/auth")]
-    [Authorize(ActiveAuthenticationSchemes = "Bearer")]
     public class AuthController : Controller
     {
         private readonly GoogleCalendarManager googleCalManager;

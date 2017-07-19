@@ -17,33 +17,28 @@ using AbcLeaves.Api.Helpers;
 using AbcLeaves.Api.Domain;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace AbcLeaves.Api
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-
-            if (Program.Args != null)
-            {
-                builder.AddCommandLine(Program.Args);
-            }
-
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper();
+            services.AddOptions();
             services.AddRouting(options => options.LowercaseUrls = true);
 
+            // MVC:
             services
                 .AddMvc()
                 .AddJsonOptions(options => {
@@ -51,9 +46,38 @@ namespace AbcLeaves.Api
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
+            // Identity:
+            services
+                .AddIdentity<AppUser, IdentityRole>(options => {
+                    options.ClaimsIdentity.UserIdClaimType = "email";
+                    options.ClaimsIdentity.UserNameClaimType = "email";
+                })
+                .AddUserManager<UserManager>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            // Authentication:
+            // Goes after Identity to override DefaultAuthenticateScheme, DefaultChallengeScheme
+            services
+                .AddAuthentication(options => {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearerAuthentication(options => {
+                    options.Authority = "https://accounts.google.com";
+                    options.Audience = Configuration["GoogleOAuth:ClientId"];
+                    options.TokenValidationParameters = new TokenValidationParameters {
+                        ValidateIssuerSigningKey = true
+                    };
+                    options.BackchannelHttpHandler = services
+                        .BuildServiceProvider()
+                        .GetHttpMessageHandler();
+                });
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             // Authorization:
-            services.AddSingleton<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, HasPersistentTokenAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, HasPersistentClaimAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, HasPersistentTokenAuthorizationHandler>();
             services.AddAuthorization(options => {
                 options.AddPolicy("CanApplyLeaves", policyBuilder => policyBuilder
                     .AddRequirements(new HasPersistentTokenRequirement("Google", "refresh_token"))
@@ -69,79 +93,31 @@ namespace AbcLeaves.Api
                 );
             });
 
+            // EF:
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection"),
                     optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
 
-            services.AddIdentity<AppUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.Configure<IdentityOptions>(options => {
-                options.ClaimsIdentity.UserIdClaimType = "email";
-                options.ClaimsIdentity.UserNameClaimType = "email";
-                options.Cookies.ApplicationCookie.AutomaticAuthenticate = false;
-                options.Cookies.ApplicationCookie.AutomaticChallenge = true;
-            });
-
-            services.AddAutoMapper();
-
-            services.AddSingleton<IConfiguration>(Configuration);
-
-            services.AddTransient<ModelStateHelper>();
-
+            // Clients:
             services.AddBackchannel();
-
-            services.AddTransient<LeavesRepository>();
-            services.AddTransient<UserManager>();
-            services.AddTransient<LeavesManager>();
-            services.AddTransient<GoogleCalendarManager>();
-
-            services.AddOptions();
             services.Configure<GoogleOAuthOptions>(Configuration.GetSection("GoogleOAuth"));
             services.Configure<GoogleCalendarOptions>(Configuration.GetSection("GoogleCalendarApi"));
             services.AddTransient<GoogleOAuthClient>();
             services.AddTransient<GoogleCalendarClient>();
 
-            // services.AddSwaggerGen(options =>
-            // {
-            //     options.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info
-            //     {
-            //         Title = "AbcLeaves API",
-            //         Version = "v1",
-            //     });
-            // });
+            // Local:
+            services.AddTransient<ModelStateHelper>();
+            services.AddTransient<LeavesRepository>();
+            services.AddTransient<UserManager>();
+            services.AddTransient<LeavesManager>();
+            services.AddTransient<GoogleCalendarManager>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            app.UseIdentity();
-
-            app.UseJwtBearerAuthentication(new JwtBearerOptions {
-                Authority = "https://accounts.google.com",
-                Audience = Configuration["GoogleOAuth:ClientId"],
-                TokenValidationParameters = new TokenValidationParameters {
-                    ValidateIssuerSigningKey = true
-                },
-                BackchannelHttpHandler = app.ApplicationServices.GetHttpMessageHandler()
-            });
-
+            app.UseAuthentication();
             app.UseMvc();
-
-            // app.UseSwagger();
-            // app.UseSwaggerUi(options =>
-            // {
-            //     options.SwaggerEndpoint("/swagger/v1/swagger.json", "AbcLeaves API V1");
-            // });
-
-            // todo: move to extensions
-            //SampleData.InitializeAppDatabaseAsync(app.ApplicationServices).Wait();
         }
     }
 }

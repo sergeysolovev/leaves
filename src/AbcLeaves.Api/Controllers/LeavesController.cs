@@ -7,11 +7,11 @@ using AbcLeaves.Api.Helpers;
 using AbcLeaves.Core;
 using System.Linq;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace AbcLeaves.Api.Controllers
 {
     [Route("api/leaves")]
-    [Authorize(ActiveAuthenticationSchemes = "Bearer")]
     public class LeavesController : Controller
     {
         private readonly IMapper mapper;
