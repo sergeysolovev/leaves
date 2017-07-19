@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AbcLeaves.BasicMvcClient.Controllers
 {
     [Route("leaves")]
-    [Authorize(ActiveAuthenticationSchemes = "GoogleOpenIdConnect")]
+    [Authorize]
     public class LeavesController : Controller
     {
         private readonly ApiClient apiClient;
@@ -88,7 +88,14 @@ namespace AbcLeaves.BasicMvcClient.Controllers
                 );
 
                 var redirectUrl = Url.Action(nameof(AcceptAccessCode), null, null, Request.Scheme);
-                var authProps = await authHelper.GetAuthenticationPropertiesAsync();
+
+                var authResult = await HttpContext.AuthenticateAsync();
+                if (!authResult.Succeeded)
+                {
+                    return BadRequest("Failed to apply a leave");
+                }
+
+                var authProps = authResult.Properties;
                 authProps.Items.Add("returnUrl", returnUrl);
                 var state = authHelper.ProtectState(authProps);
                 var challengeUrl = googleOAuthHelper.BuildChallengeUrl(redirectUrl, state);

@@ -11,21 +11,17 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using AbcLeaves.Core;
 using AbcLeaves.BasicMvcClient.Helpers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace AbcLeaves.BasicMvcClient
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -44,6 +40,41 @@ namespace AbcLeaves.BasicMvcClient
                 });
 
             // authentication:
+            services
+                .AddAuthentication(options => {
+                    options.DefaultAuthenticateScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                })
+                .AddCookieAuthentication()
+                .AddOpenIdConnectAuthentication(options => {
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.Authority = "https://accounts.google.com";
+                    options.ResponseType = OpenIdConnectResponseType.IdToken;
+                    options.CallbackPath = new PathString("/signin-oidc");
+                    options.ClientId = Configuration["GoogleOAuth:ClientId"];
+                    options.ClientSecret = Configuration["GoogleOAuth:ClientSecret"];
+                    options.GetClaimsFromUserInfoEndpoint = false;
+                    options.SaveTokens = true;
+                    options.UseTokenLifetime = true;
+
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                    options.Scope.Add("email");
+
+                    options.Events = new OpenIdConnectEvents() {
+                        OnTicketReceived = context => {
+                            context.Properties.IsPersistent = true;
+                            context.Properties.AllowRefresh = false;
+                            return Task.CompletedTask;
+                        }
+                    };
+
+                    options.BackchannelHttpHandler = services
+                        .BuildServiceProvider()
+                        .GetHttpMessageHandler();
+                });
+
+            // auth helpers:
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<AuthHelper>();
 
@@ -59,43 +90,9 @@ namespace AbcLeaves.BasicMvcClient
             services.AddBackchannel();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            app.UseCookieAuthentication(new CookieAuthenticationOptions {
-                AuthenticationScheme = "GoogleOpenIdConnectCookies",
-                AutomaticAuthenticate = false,
-                AutomaticChallenge = false
-            });
-            var openIdConnectOptions = new OpenIdConnectOptions() {
-                AuthenticationScheme = "GoogleOpenIdConnect",
-                SignInScheme = "GoogleOpenIdConnectCookies",
-                Authority = "https://accounts.google.com",
-                ResponseType = OpenIdConnectResponseType.IdToken,
-                CallbackPath = new PathString("/signin-oidc"),
-                ClientId = Configuration["GoogleOAuth:ClientId"],
-                ClientSecret = Configuration["GoogleOAuth:ClientSecret"],
-                AutomaticAuthenticate = false,
-                AutomaticChallenge = false,
-                GetClaimsFromUserInfoEndpoint = false,
-                SaveTokens = true,
-                UseTokenLifetime = true,
-                BackchannelHttpHandler = app.ApplicationServices.GetHttpMessageHandler(),
-                Events = new OpenIdConnectEvents()
-                {
-                    OnTicketReceived = context => {
-                        context.Properties.IsPersistent = true;
-                        context.Properties.AllowRefresh = false;
-                        return Task.CompletedTask;
-                    }
-                }
-            };
-            openIdConnectOptions.Scope.Clear();
-            openIdConnectOptions.Scope.Add("openid");
-            openIdConnectOptions.Scope.Add("email");
-            app.UseOpenIdConnectAuthentication(openIdConnectOptions);
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

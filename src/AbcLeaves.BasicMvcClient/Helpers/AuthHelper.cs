@@ -4,7 +4,6 @@ using AbcLeaves.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 
 namespace AbcLeaves.BasicMvcClient.Helpers
@@ -27,16 +26,15 @@ namespace AbcLeaves.BasicMvcClient.Helpers
             this.httpContext = httpContextAccessor.HttpContext;
         }
 
-        public async Task<AuthenticationProperties> GetAuthenticationPropertiesAsync()
-        {
-            var authContext = new AuthenticateContext("GoogleOpenIdConnect");
-            await httpContext.Authentication.AuthenticateAsync(authContext);
-            return new AuthenticationProperties(authContext.Properties);
-        }
-
         public async Task<string> GetIdTokenAsync()
         {
-            var authProps = await GetAuthenticationPropertiesAsync();
+            var authResult = await httpContext.AuthenticateAsync();
+            if (!authResult.Succeeded)
+            {
+                return null;
+            }
+
+            var authProps = authResult.Properties;
             return authProps.GetTokenValue("id_token");
         }
 
