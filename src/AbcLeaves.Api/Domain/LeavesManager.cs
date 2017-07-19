@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AbcLeaves.Api.Models;
 using AbcLeaves.Api.Repositories;
 using AutoMapper;
@@ -20,6 +22,26 @@ namespace AbcLeaves.Api.Domain
             this.mapper = mapper;
             this.leavesRepository = leavesRepository;
             this.googleCalendarManager = googleCalendarManager;
+        }
+
+        public async Task<GetLeavesContract> GetByUserId(string userId)
+        {
+            return new GetLeavesContract {
+                Items = await leavesRepository
+                    .GetByUserId(userId)
+                    .Select(leave => mapper.Map<Leave, GetLeavesItemContract>(leave))
+                    .ToList()
+            };
+        }
+
+        public async Task<GetLeavesContract> GetAll()
+        {
+            return new GetLeavesContract {
+                Items = await leavesRepository
+                    .GetAll()
+                    .Select(leave => mapper.Map<Leave, GetLeavesItemContract>(leave))
+                    .ToList()
+            };
         }
 
         public async Task<LeaveResult> ApplyAsync(ApplyLeaveContract leaveContract)

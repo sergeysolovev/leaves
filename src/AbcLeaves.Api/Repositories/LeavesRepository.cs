@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Models;
 
@@ -28,6 +30,21 @@ namespace AbcLeaves.Api.Repositories
                     .Load();
             }
             return leave;
+        }
+
+        public IAsyncEnumerable<Leave> GetByUserId(string userId)
+        {
+            return dbContext
+                .Leaves
+                .ToAsyncEnumerable()
+                .Where(l => l.UserId == userId);
+        }
+
+        public IAsyncEnumerable<Leave> GetAll()
+        {
+            return dbContext
+                .Leaves
+                .ToAsyncEnumerable();
         }
 
         public async Task InsertAsync(Leave leave)

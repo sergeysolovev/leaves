@@ -7,6 +7,7 @@ using System.Net.Http;
 using AbcLeaves.Core;
 using AbcLeaves.BasicMvcClient.Helpers;
 using AbcLeaves.BasicMvcClient.DataContracts;
+using System.Linq;
 
 namespace AbcLeaves.BasicMvcClient
 {
@@ -25,6 +26,42 @@ namespace AbcLeaves.BasicMvcClient
             this.backchannel = Throw
                 .IfNull(backchannelFactory, nameof(backchannelFactory))
                 .Create(Throw.IfNull(options, nameof(options)).Value.BaseUrl);
+        }
+
+        public async Task<GetLeavesContract> GetLeaves()
+        {
+            var idToken = await authHelper.GetIdTokenAsync();
+            var apiResult = await backchannel.GetAsync("leaves/", x => x
+                .WithBearerToken(idToken)
+            );
+
+            if (!apiResult.Succeeded || !apiResult.Response.IsSuccessStatusCode)
+            {
+                return GetLeavesContract.Empty;
+            }
+
+            var content = await apiResult.Response.Content.ReadAsStringAsync();
+            var leaves = JsonConvert.DeserializeObject<GetLeavesContract>(content);
+
+            return leaves;
+        }
+
+        public async Task<GetLeavesContract> GetAllLeaves()
+        {
+            var idToken = await authHelper.GetIdTokenAsync();
+            var apiResult = await backchannel.GetAsync("leaves/all/", x => x
+                .WithBearerToken(idToken)
+            );
+
+            if (!apiResult.Succeeded || !apiResult.Response.IsSuccessStatusCode)
+            {
+                return GetLeavesContract.Empty;
+            }
+
+            var content = await apiResult.Response.Content.ReadAsStringAsync();
+            var leaves = JsonConvert.DeserializeObject<GetLeavesContract>(content);
+
+            return leaves;
         }
 
         public async Task<SendMessageResult> ApplyLeaveAsync(CreateLeaveContract leave)

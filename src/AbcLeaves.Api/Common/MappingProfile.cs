@@ -12,6 +12,7 @@ namespace AbcLeaves.Api
             CreateMap<PostLeaveContract, ApplyLeaveContract>();
             CreateMap<ApplyLeaveContract, Leave>();
             CreateMap<PublishUserEventContract, AddCalendarEventContract>();
+            CreateMap<Leave, GetLeavesItemContract>();
             CreateMap<Leave, PublishUserEventContract>().AfterMap((src, dst) => {
                 dst.Title = LeaveEventDefaults.Title;
                 dst.Description = LeaveEventDefaults.Description;
@@ -20,8 +21,7 @@ namespace AbcLeaves.Api
                 dst.Summary = src.Title
             );
             CreateMap<DateTime, CalendarEventDateTime>()
-                .ConstructUsing(dateTime => new CalendarEventDateTime(dateTime)
-            );
+                .ConstructUsing(dateTime => new CalendarEventDateTime(dateTime));
         }
     }
 }

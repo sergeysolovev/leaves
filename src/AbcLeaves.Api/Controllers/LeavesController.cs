@@ -5,6 +5,8 @@ using AbcLeaves.Api.Domain;
 using AutoMapper;
 using AbcLeaves.Api.Helpers;
 using AbcLeaves.Core;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Controllers
 {
@@ -27,6 +29,31 @@ namespace AbcLeaves.Api.Controllers
             this.leavesManager = leavesManager;
             this.modelHelper = modelStateHelper;
             this.mapper = mapper;
+        }
+
+        // GET api/leaves
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var user = await userManager.GetOrCreateUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return BadRequest();
+            }
+
+            return Json(
+                await leavesManager.GetByUserId(user.Id)
+            );
+        }
+
+        // GET api/leaves/all
+        [HttpGet("all")]
+        [Authorize(Policy = "CanManageAllLeaves")]
+        public async Task<IActionResult> GetAll()
+        {
+            return Json(
+                await leavesManager.GetAll()
+            );
         }
 
         // POST api/leaves

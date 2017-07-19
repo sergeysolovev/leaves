@@ -48,8 +48,7 @@ namespace AbcLeaves.Api
                 .AddMvc()
                 .AddJsonOptions(options => {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    options.SerializerSettings.Formatting = Formatting.Indented;
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
             // Authorization:
@@ -58,6 +57,9 @@ namespace AbcLeaves.Api
             services.AddAuthorization(options => {
                 options.AddPolicy("CanApplyLeaves", policyBuilder => policyBuilder
                     .AddRequirements(new HasPersistentTokenRequirement("Google", "refresh_token"))
+                );
+                options.AddPolicy("CanManageAllLeaves", policyBuilder => policyBuilder
+                    .AddRequirements(new HasPersistentClaimRequirement("ManageAllLeaves", "Allowed"))
                 );
                 options.AddPolicy("CanApproveLeaves", policyBuilder => policyBuilder
                     .AddRequirements(new HasPersistentClaimRequirement("ApproveLeaves", "Allowed"))

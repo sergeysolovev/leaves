@@ -28,12 +28,25 @@ namespace AbcLeaves.BasicMvcClient.Controllers
             this.googleOAuthHelper = googleOAuthHelper;
         }
 
+        // GET /leaves
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return Ok("Here goes the list of leaves for the current user...");
+            return View(
+                await apiClient.GetLeaves()
+            );
         }
 
+        // GET /leaves/all
+        [HttpGet("all")]
+        public async Task<IActionResult> IndexAll()
+        {
+            return View(
+                await apiClient.GetAllLeaves()
+            );
+        }
+
+        // GET /leaves/apply/{start}/{end}
         [HttpGet("apply/{start}/{end}")]
         public async Task<IActionResult> Create(DateTime start, DateTime end)
         {

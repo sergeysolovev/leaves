@@ -87,6 +87,7 @@ namespace AbcLeaves.Api.Domain
 
                 if (IsAdmin(principal))
                 {
+                    await AddClaimAsync(user, new Claim("ManageAllLeaves", "Allowed"));
                     await AddClaimAsync(user, new Claim("ApproveLeaves", "Allowed"));
                     await AddClaimAsync(user, new Claim("DeclineLeaves", "Allowed"));
                 }
