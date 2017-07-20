@@ -117,7 +117,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         public async Task<IActionResult> ApproveLeave(string id)
         {
             var result = await apiClient.ApproveLeaveAsync(id);
-            return new ObjectResult(result);
+            return RedirectToAction(nameof(IndexAll));
         }
 
         // GET leaves/decline/{id}
@@ -125,7 +125,7 @@ namespace AbcLeaves.BasicMvcClient.Controllers
         public async Task<IActionResult> DeclineLeave(string id)
         {
             var result = await apiClient.DeclineLeaveAsync(id);
-            return new ObjectResult(result);
+            return RedirectToAction(nameof(IndexAll));
         }
 
         // GET /leaves/auth/googlecal/
