@@ -1,0 +1,15 @@
+<h2>id_token</h2>
+
+<h3>raw</h3>
+<p>@ViewData["id_token"]</p>
+
+<h3>curl</h3>
+$ curl [url] -H "Authorization: Bearer @ViewData["id_token"]"
+
+<h3>httpie</h3>
+$ http [url] Authorization:"Bearer @ViewData["id_token"]"
+
+<h3>token info</h3>
+<a href="https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=@ViewData["id_token"]">
+    https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=@ViewData["id_token"]
+</a>
