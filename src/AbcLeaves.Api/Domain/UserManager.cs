@@ -58,7 +58,7 @@ namespace AbcLeaves.Api.Domain
                 return false;
             }
 
-            var admins = configuration["Admins"];
+            var admins = configuration["admins"];
             if (String.IsNullOrEmpty(admins))
             {
                 return false;
