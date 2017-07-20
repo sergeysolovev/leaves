@@ -28,6 +28,7 @@ namespace AbcLeaves.Api.Controllers
 
         // GET api/leaves
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Get()
         {
             var user = await userManager.GetOrCreateUserAsync(HttpContext.User);
