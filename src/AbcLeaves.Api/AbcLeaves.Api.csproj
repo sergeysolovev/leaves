@@ -2,9 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>AbcLeaves.Api</AssemblyName>
-    <PackageId>AbcLeaves.Api</PackageId>
+    <AssemblyName>leaves-api</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifiers>linux-x64;osx.10.12-x64;win10-x64</RuntimeIdentifiers>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Dockerfile" CopyToPublishDirectory="Always" />
+    <Content Include="leaves.db" CopyToPublishDirectory="Always" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../AbcLeaves.Utils/AbcLeaves.Utils.csproj" />

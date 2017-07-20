@@ -93,7 +93,7 @@ namespace AbcLeaves.Api
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection"),
-                    optionsBuilder => optionsBuilder.MigrationsAssembly("AbcLeaves.Api")));
+                    optionsBuilder => optionsBuilder.MigrationsAssembly("leaves-api")));
 
             // Clients:
             services.AddBackchannel();
