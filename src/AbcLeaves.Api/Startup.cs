@@ -84,12 +84,6 @@ namespace AbcLeaves.Api
                 options.AddPolicy("CanManageAllLeaves", policyBuilder => policyBuilder
                     .AddRequirements(new HasPersistentClaimRequirement("ManageAllLeaves", "Allowed"))
                 );
-                options.AddPolicy("CanApproveLeaves", policyBuilder => policyBuilder
-                    .AddRequirements(new HasPersistentClaimRequirement("ApproveLeaves", "Allowed"))
-                );
-                options.AddPolicy("CanDeclineLeaves", policyBuilder => policyBuilder
-                    .AddRequirements(new HasPersistentClaimRequirement("DeclineLeaves", "Allowed"))
-                );
             });
 
             // EF:

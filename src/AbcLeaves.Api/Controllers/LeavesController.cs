@@ -78,7 +78,7 @@ namespace AbcLeaves.Api.Controllers
 
         // PATCH api/leaves/{id}/approve
         [HttpPatch("{id}/approve")]
-        [Authorize(Policy = "CanApproveLeaves")]
+        [Authorize(Policy = "CanManageAllLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
             => LeaveToActionResult(
                 await leavesManager.ApproveAsync(id)
@@ -86,7 +86,7 @@ namespace AbcLeaves.Api.Controllers
 
         // PATCH api/leaves/{id}/decline
         [HttpPatch("{id}/decline")]
-        [Authorize(Policy = "CanDeclineLeaves")]
+        [Authorize(Policy = "CanManageAllLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
             => LeaveToActionResult(
                 await leavesManager.DeclineAsync(id)
