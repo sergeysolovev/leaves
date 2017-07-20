@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace AbcLeaves.Core
+namespace AbcLeaves.Api.Operations
 {
     public class VerifyAccessResult : OperationResult<bool>, IVerifyAccessResult
     {

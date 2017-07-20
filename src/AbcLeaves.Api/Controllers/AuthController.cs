@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AbcLeaves.Api.Domain;
-using AbcLeaves.Core;
+using AbcLeaves.Api.Operations;
 
 namespace AbcLeaves.Api.Controllers
 {

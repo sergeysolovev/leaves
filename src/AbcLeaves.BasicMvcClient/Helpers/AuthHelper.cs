@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AbcLeaves.Core;
+using AbcLeaves.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +17,11 @@ namespace AbcLeaves.BasicMvcClient.Helpers
             IHttpContextAccessor httpContextAccessor,
             IDataProtectionProvider dataProtectionProvider)
         {
-            if (httpContextAccessor == null)
-            {
-                throw new ArgumentNullException(nameof(httpContextAccessor));
-            }
+            Throw.IfNull(httpContextAccessor, nameof(httpContextAccessor));
+            Throw.IfNull(dataProtectionProvider, nameof(dataProtectionProvider));
 
-            this.dataProtectionProvider = dataProtectionProvider;
             this.httpContext = httpContextAccessor.HttpContext;
+            this.dataProtectionProvider = dataProtectionProvider;
         }
 
         public async Task<string> GetIdTokenAsync()

@@ -1,4 +1,4 @@
-﻿namespace AbcLeaves.Core
+﻿namespace AbcLeaves.Api.Operations
 {
     public interface IReturnUrlResult : IOperationResult
     {

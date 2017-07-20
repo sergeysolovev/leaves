@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AbcLeaves.Core
+namespace AbcLeaves.Utils
 {
     public static class Throw
     {

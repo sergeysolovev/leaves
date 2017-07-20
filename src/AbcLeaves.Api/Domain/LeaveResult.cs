@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AbcLeaves.Api.Models;
-using AbcLeaves.Core;
+using AbcLeaves.Api.Operations;
 using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain

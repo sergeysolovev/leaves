@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using AbcLeaves.Core;
 using AbcLeaves.BasicMvcClient.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 

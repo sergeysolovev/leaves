@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using AbcLeaves.BasicMvcClient.DataContracts;
 using AbcLeaves.BasicMvcClient.Helpers;
-using AbcLeaves.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

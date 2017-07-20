@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AbcLeaves.Core
+namespace AbcLeaves.Api.Operations
 {
     public class ModelValidationResult : OperationResult
     {

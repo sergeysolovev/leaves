@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AbcLeaves.Api.Helpers;
-using AbcLeaves.Core;
+using AbcLeaves.Utils;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 

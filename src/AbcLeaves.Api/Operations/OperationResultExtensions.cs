@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AbcLeaves.Core
+namespace AbcLeaves.Api.Operations
 {
     public static class OperationResultExtensions
     {

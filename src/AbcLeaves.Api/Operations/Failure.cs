@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AbcLeaves.Core
+namespace AbcLeaves.Api.Operations
 {
     public class Failure : IDictionary<string, object>
     {

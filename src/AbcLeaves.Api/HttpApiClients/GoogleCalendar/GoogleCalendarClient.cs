@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AutoMapper;
-using AbcLeaves.Core;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
+using AbcLeaves.Utils;
 
 namespace AbcLeaves.Api.Services
 {
