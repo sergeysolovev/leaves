@@ -37,6 +37,9 @@ namespace AbcLeaves.Api
             services.AddOptions();
             services.AddRouting(options => options.LowercaseUrls = true);
 
+            // CORS
+            services.AddCors();
+
             // MVC:
             services
                 .AddMvc()
