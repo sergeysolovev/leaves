@@ -2,7 +2,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AbcLeaves.Api.Operations;
 using AbcLeaves.Api.Services;
 using AbcLeaves.Utils;
 using AutoMapper;
@@ -45,13 +44,12 @@ namespace AbcLeaves.Api.Domain
                 return null;
             }
 
-            var exchangeResult = await googleAuthClient.ExchangeRefreshToken(refreshToken);
-            if (!exchangeResult.Succeeded)
+            var accessToken = await googleAuthClient.ExchangeRefreshToken(refreshToken);
+            if (String.IsNullOrEmpty(accessToken))
             {
                 return null;
             }
 
-            var accessToken = exchangeResult.AccessToken;
             var addEventContract = mapper.Map<PublishUserEventContract, AddCalendarEventContract>(
                 eventContract,
                 opts => opts.AfterMap((src, dst) => dst.AccessToken = accessToken)
@@ -60,7 +58,7 @@ namespace AbcLeaves.Api.Domain
             return await googleCalendarClient.AddEventAsync(addEventContract);
         }
 
-        public async Task<VerifyAccessResult> GrantAccess(
+        public async Task<GrantAccessResult> GrantAccess(
             string code,
             string redirectUrl,
             ClaimsPrincipal principal)
@@ -68,38 +66,38 @@ namespace AbcLeaves.Api.Domain
             var user = await userManager.GetOrCreateUserAsync(principal);
             if (user == null)
             {
-                return VerifyAccessResult.Fail(
-                    "Failed to grant access to google apis"
+                return GrantAccessResult.Fail(
+                    "Failed to grant access to google calendar"
                 );
             }
 
-            var exchangeCodeResult = await googleAuthClient.ExchangeAuthCode(code, redirectUrl);
-            if (!exchangeCodeResult.Succeeded)
+            var exchangeResponse = await googleAuthClient.ExchangeAuthCode(code, redirectUrl);
+            if (exchangeResponse == null)
             {
-                return VerifyAccessResult.Fail(
-                    "Failed to grant access to google apis"
+                return GrantAccessResult.Fail(
+                    "Failed to grant access to google calendar"
                 );
             }
 
-            var idToken = exchangeCodeResult.Tokens.IdToken;
+            var idToken = exchangeResponse.IdToken;
             if (!VerifyOAuthExchangeIdentity())
             {
-                return VerifyAccessResult.Fail(
-                    "Failed to grant access to google apis. " +
+                return GrantAccessResult.Fail(
+                    "Failed to grant access to google calendar. " +
                     "Authorization code doesn't match the authenticated identity"
                 );
             }
 
-            var refreshToken = exchangeCodeResult.Tokens.RefreshToken;
+            var refreshToken = exchangeResponse.RefreshToken;
             var identityResult = await userManager.SetRefreshTokenAsync(user, refreshToken);
             if (!identityResult.Succeeded)
             {
-                return VerifyAccessResult.Fail(
-                    "Failed to grant access to google apis"
+                return GrantAccessResult.Fail(
+                    "Failed to grant access to google calendar"
                 );
             }
 
-            return VerifyAccessResult.Succeed();
+            return GrantAccessResult.Succeed();
 
             bool VerifyOAuthExchangeIdentity()
             {

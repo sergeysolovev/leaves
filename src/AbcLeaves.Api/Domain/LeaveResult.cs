@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using AbcLeaves.Api.Models;
-using AbcLeaves.Api.Operations;
+using AbcLeaves.Utils;
 using Newtonsoft.Json;
 
 namespace AbcLeaves.Api.Domain
 {
-    public class LeaveResult : OperationResult<Leave>, IFindResult
+    public class LeaveResult
     {
-        public Leave Leave => base.Value;
+        public bool Succeeded => (Error == null);
+        public string Error { get; private set; }
+        public Leave Leave { get; private set; }
+        public bool NotFound { get; private set; }
 
-        public int? LeaveId => Leave?.Id;
+        private LeaveResult(Leave leave = null)
+            => Leave = leave;
 
-        [JsonIgnore]
-        public bool NotFound { get; protected set; }
-
-        protected LeaveResult() : base() { }
-
-        protected LeaveResult(Leave leave) : base(leave) { }
-
-        protected LeaveResult(string error) : base(error) { }
+        protected LeaveResult(string error)
+            => Error = Throw.IfNullOrEmpty(error, nameof(error));
 
         public static LeaveResult Succeed(Leave leave)
             => new LeaveResult(leave);
@@ -30,10 +28,7 @@ namespace AbcLeaves.Api.Domain
         public static LeaveResult Fail(string error)
             => new LeaveResult(error);
 
-        public static LeaveResult FailNotFound(int leaveId)
-        {
-            var error = $"Leave id={leaveId} is not found";
-            return new LeaveResult(error) { NotFound = true };
-        }
+        public static LeaveResult ReturnNotFound()
+            => new LeaveResult() { NotFound = true };
     }
 }

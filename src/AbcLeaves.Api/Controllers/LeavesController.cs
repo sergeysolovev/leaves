@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using AbcLeaves.Api.Domain;
 using AutoMapper;
-using AbcLeaves.Api.Helpers;
 using System.Linq;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using AbcLeaves.Api.Operations;
 
 namespace AbcLeaves.Api.Controllers
 {
@@ -17,17 +15,14 @@ namespace AbcLeaves.Api.Controllers
         private readonly IMapper mapper;
         private readonly UserManager userManager;
         private readonly LeavesManager leavesManager;
-        private readonly ModelStateHelper modelHelper;
 
         public LeavesController(
             IMapper mapper,
             UserManager userManager,
-            LeavesManager leavesManager,
-            ModelStateHelper modelStateHelper)
+            LeavesManager leavesManager)
         {
             this.userManager = userManager;
             this.leavesManager = leavesManager;
-            this.modelHelper = modelStateHelper;
             this.mapper = mapper;
         }
 
@@ -63,9 +58,7 @@ namespace AbcLeaves.Api.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return ModelValidationResult
-                    .Fail(modelHelper.GetValidationErrors(ModelState))
-                    .ToMvcActionResult();
+                return BadRequest(ModelState);
             }
 
             var user = await userManager.GetOrCreateUserAsync(HttpContext.User);
@@ -78,29 +71,42 @@ namespace AbcLeaves.Api.Controllers
                 leaveContract, opts => opts.AfterMap((src, dst) => dst.UserId = user.Id)
             );
 
-            return await leavesManager
-                .ApplyAsync(applyLeaveContract)
-                .ToMvcActionResultAsync();
+            return LeaveToActionResult(
+                await leavesManager.ApplyAsync(applyLeaveContract)
+            );
         }
 
         // PATCH api/leaves/{id}/approve
         [HttpPatch("{id}/approve")]
         [Authorize(Policy = "CanApproveLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
-        {
-            return await leavesManager
-                .ApproveAsync(id)
-                .ToMvcActionResultAsync();
-        }
+            => LeaveToActionResult(
+                await leavesManager.ApproveAsync(id)
+            );
 
         // PATCH api/leaves/{id}/decline
         [HttpPatch("{id}/decline")]
         [Authorize(Policy = "CanDeclineLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
+            => LeaveToActionResult(
+                await leavesManager.DeclineAsync(id)
+            );
+
+        private IActionResult LeaveToActionResult(LeaveResult leaveResult)
         {
-            return await leavesManager
-                .DeclineAsync(id)
-                .ToMvcActionResultAsync();
+            if (!leaveResult.Succeeded)
+            {
+                return BadRequest(leaveResult.Error);
+            }
+
+            if (leaveResult.NotFound)
+            {
+                return NotFound();
+            }
+
+            return Json(
+                mapper.Map<GetLeavesItemContract>(leaveResult.Leave)
+            );
         }
     }
 }

@@ -56,7 +56,7 @@ namespace AbcLeaves.Api.Domain
             var leave = leavesRepository.GetById(leaveId);
             if (leave == null)
             {
-                return LeaveResult.FailNotFound(leaveId);
+                return LeaveResult.ReturnNotFound();
             }
             if (leave.Status == LeaveStatus.Approved)
             {
@@ -91,7 +91,7 @@ namespace AbcLeaves.Api.Domain
             var leave = leavesRepository.GetById(leaveId);
             if (leave == null)
             {
-                return LeaveResult.FailNotFound(leaveId);
+                return LeaveResult.ReturnNotFound();
             }
             if (leave.Status == LeaveStatus.Approved)
             {

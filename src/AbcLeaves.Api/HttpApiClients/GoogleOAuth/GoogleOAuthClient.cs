@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using AbcLeaves.Api.Helpers;
 using AbcLeaves.Utils;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AbcLeaves.Api.Services
@@ -25,10 +25,8 @@ namespace AbcLeaves.Api.Services
             this.backchannel = factory.Create();
         }
 
-        public async Task<ExchangeAuthCodeResult> ExchangeAuthCode(string code, string redirectUrl)
+        public async Task<OAuthExchangeResponse> ExchangeAuthCode(string code, string redirectUrl)
         {
-            var error = "Failed to exchange oauth authorization code with tokens";
-
             var tokenRequestContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["code"] = code,
@@ -46,50 +44,28 @@ namespace AbcLeaves.Api.Services
 
             if (!exchangeResult.Succeeded)
             {
-                ExchangeAuthCodeResult.Fail(error);
+                return null;
             }
 
             var response = exchangeResult.Response;
-
             if (!response.IsSuccessStatusCode)
             {
-                ExchangeAuthCodeResult.Fail(error);
+                return null;
             }
 
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var exchangeResponse = new OAuthExchangeResponse(payload);
-            var idToken = exchangeResponse.IdToken;
-            var accessToken = exchangeResponse.AccessToken;
-            var refreshToken = exchangeResponse.RefreshToken;
-            var missingTokens = new List<string>();
-
-            if (String.IsNullOrEmpty(idToken))
+            try
             {
-                missingTokens.Add("id_token");
+                var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+                return new OAuthExchangeResponse(payload);
             }
-            if (String.IsNullOrEmpty(accessToken))
+            catch (JsonException)
             {
-                missingTokens.Add("access_token");
+                return null;
             }
-            if (String.IsNullOrEmpty(refreshToken))
-            {
-                missingTokens.Add("refresh_token");
-            }
-
-            if (missingTokens.Any())
-            {
-                return ExchangeAuthCodeResult.Fail(
-                    $"Failed to retrieve oauth tokens: {String.Join(",", missingTokens)}"
-                );
-            }
-
-            return ExchangeAuthCodeResult.Success(idToken, accessToken, refreshToken);
         }
 
-        public async Task<ExchangeRefreshTokenResult> ExchangeRefreshToken(string refreshToken)
+        public async Task<string> ExchangeRefreshToken(string refreshToken)
         {
-            var error = "Failed to exchange the refresh token with an access token";
-
             var tokenRequestContent = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["refresh_token"] = refreshToken,
@@ -106,28 +82,25 @@ namespace AbcLeaves.Api.Services
 
             if (!exchangeResult.Succeeded)
             {
-                return ExchangeRefreshTokenResult.Fail(error);
+                return null;
             }
 
             var response = exchangeResult.Response;
-
             if (!response.IsSuccessStatusCode)
             {
-                return ExchangeRefreshTokenResult.Fail(error);
+                return null;
             }
 
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var exchangeResponse = new OAuthExchangeResponse(payload);
-            var accessToken = exchangeResponse.AccessToken;
-
-            if (String.IsNullOrEmpty(accessToken))
+            try
             {
-                return ExchangeRefreshTokenResult.Fail(
-                    "Failed to exchange the refresh_token with an access_token"
-                );
+                var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+                var exchangeResponse = new OAuthExchangeResponse(payload);
+                return exchangeResponse.AccessToken;
             }
-
-            return ExchangeRefreshTokenResult.Success(accessToken);
+            catch (JsonException)
+            {
+                return null;
+            }
         }
     }
 }

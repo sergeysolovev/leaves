@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AbcLeaves.Api.Domain;
-using AbcLeaves.Api.Operations;
+using System.Net;
 
 namespace AbcLeaves.Api.Controllers
 {
@@ -22,8 +22,23 @@ namespace AbcLeaves.Api.Controllers
             [FromQuery]string code,
             [FromQuery]string redirectUrl)
         {
-            var result = await googleCalManager.GrantAccess(code, redirectUrl, HttpContext.User);
-            return result.ToMvcActionResult();
+            var grantAccessResult = await googleCalManager.GrantAccess(
+                code,
+                redirectUrl,
+                HttpContext.User
+            );
+
+            if (!grantAccessResult.Succeeded)
+            {
+                return BadRequest(grantAccessResult.Error);
+            }
+
+            if (grantAccessResult.Forbidden)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden);
+            }
+
+            return Ok();
         }
     }
 }

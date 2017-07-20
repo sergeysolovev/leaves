@@ -13,7 +13,6 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.Http;
 using Newtonsoft.Json;
-using AbcLeaves.Api.Helpers;
 using AbcLeaves.Api.Domain;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -107,7 +106,6 @@ namespace AbcLeaves.Api
             services.AddTransient<GoogleCalendarClient>();
 
             // Local:
-            services.AddTransient<ModelStateHelper>();
             services.AddTransient<LeavesRepository>();
             services.AddTransient<UserManager>();
             services.AddTransient<LeavesManager>();
