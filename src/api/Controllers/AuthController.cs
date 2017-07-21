@@ -6,7 +6,7 @@ using System.Net;
 
 namespace Leaves.Api.Controllers
 {
-    [Route("api/auth")]
+    [Route("auth")]
     public class AuthController : Controller
     {
         private readonly GoogleCalendarManager googleCalManager;
@@ -16,7 +16,7 @@ namespace Leaves.Api.Controllers
             this.googleCalManager = googleCalManager;
         }
 
-        // POST /api/auth/googlecal/
+        // POST /auth/googlecal/
         [HttpPost("googlecal")]
         public async Task<IActionResult> GrantAccessToGoogleCalendar(
             [FromQuery]string code,

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Leaves.Api.Controllers
 {
-    [Route("api/leaves")]
+    [Route("leaves")]
     public class LeavesController : Controller
     {
         private readonly IMapper mapper;
@@ -26,7 +26,7 @@ namespace Leaves.Api.Controllers
             this.mapper = mapper;
         }
 
-        // GET api/leaves
+        // GET /leaves
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Get()
@@ -42,7 +42,7 @@ namespace Leaves.Api.Controllers
             );
         }
 
-        // GET api/leaves/all
+        // GET /leaves/all
         [HttpGet("all")]
         [Authorize(Policy = "CanManageAllLeaves")]
         public async Task<IActionResult> GetAll()
@@ -52,7 +52,7 @@ namespace Leaves.Api.Controllers
             );
         }
 
-        // POST api/leaves
+        // POST /leaves
         [HttpPost]
         [Authorize(Policy = "CanApplyLeaves")]
         public async Task<IActionResult> Post([FromBody]PostLeaveContract leaveContract)
@@ -77,7 +77,7 @@ namespace Leaves.Api.Controllers
             );
         }
 
-        // PATCH api/leaves/{id}/approve
+        // PATCH /leaves/{id}/approve
         [HttpPatch("{id}/approve")]
         [Authorize(Policy = "CanManageAllLeaves")]
         public async Task<IActionResult> Approve([FromRoute]int id)
@@ -85,7 +85,7 @@ namespace Leaves.Api.Controllers
                 await leavesManager.ApproveAsync(id)
             );
 
-        // PATCH api/leaves/{id}/decline
+        // PATCH /leaves/{id}/decline
         [HttpPatch("{id}/decline")]
         [Authorize(Policy = "CanManageAllLeaves")]
         public async Task<IActionResult> Decline([FromRoute]int id)
