@@ -2,7 +2,7 @@
 
 ASP.NET Core 2.0 API and MVC client for applying and managing leaves of absence. Authenticates through [Google Open Id Connect](https://developers.google.com/identity/protocols/OpenIDConnect), uses [hybrid server-side flow](https://developers.google.com/identity/sign-in/web/server-side-flow) and [Google Calendar API](https://developers.google.com/google-apps/calendar/) to share an approved leave when the user is offline.
 
-Live version of the API is available here: [https://leaves-api.now.sh/api/](https://leaves-api.now.sh/api).
+Live version of the API is available here: [https://leaves-api.now.sh](https://leaves-api.now.sh/api).
 
 ## Getting Started
 
