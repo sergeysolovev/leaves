@@ -16,7 +16,6 @@ namespace Leaves.MvcClient
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls("http://*:8081")
                 .Build();
     }
 }
