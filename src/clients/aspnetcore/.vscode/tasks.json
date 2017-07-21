@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/Leaves.MvcClient.csproj"
+                "${workspaceRoot}/Leaves.Client.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
