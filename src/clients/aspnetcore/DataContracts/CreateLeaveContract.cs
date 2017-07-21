@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace Leaves.MvcClient.DataContracts
+namespace Leaves.Client.DataContracts
 {
     public class CreateLeaveContract
     {

@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Leaves.Utils/Leaves.Utils.csproj" />
+    <ProjectReference Include="../../utils/leaves-utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>

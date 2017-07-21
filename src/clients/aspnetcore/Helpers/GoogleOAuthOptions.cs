@@ -1,4 +1,4 @@
-namespace Leaves.MvcClient.Helpers
+namespace Leaves.Client.Helpers
 {
     public class GoogleOAuthOptions
     {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore;
 
-namespace Leaves.MvcClient
+namespace Leaves.Client
 {
     public class Program
     {

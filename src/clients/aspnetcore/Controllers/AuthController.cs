@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using Leaves.MvcClient.DataContracts;
-using Leaves.MvcClient.Helpers;
+using Leaves.Client.DataContracts;
+using Leaves.Client.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Leaves.MvcClient.Controllers
+namespace Leaves.Client.Controllers
 {
     [Route("auth")]
     public class AuthController : Controller

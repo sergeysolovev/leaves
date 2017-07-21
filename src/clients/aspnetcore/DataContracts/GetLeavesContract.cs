@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Leaves.MvcClient.DataContracts
+namespace Leaves.Client.DataContracts
 {
     public class GetLeavesContract
     {

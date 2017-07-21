@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 
-namespace Leaves.MvcClient.Helpers
+namespace Leaves.Client.Helpers
 {
     public class AuthHelper
     {

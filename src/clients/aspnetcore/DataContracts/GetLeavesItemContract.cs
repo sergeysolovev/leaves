@@ -1,6 +1,6 @@
 using System;
 
-namespace Leaves.MvcClient.DataContracts
+namespace Leaves.Client.DataContracts
 {
     public class GetLeavesItemContract
     {

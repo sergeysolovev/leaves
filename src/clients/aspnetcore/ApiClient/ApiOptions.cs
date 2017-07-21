@@ -1,4 +1,4 @@
-namespace Leaves.MvcClient
+namespace Leaves.Client
 {
     public class ApiOptions
     {

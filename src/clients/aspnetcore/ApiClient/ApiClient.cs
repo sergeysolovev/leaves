@@ -4,12 +4,12 @@ using System.Net;
 using System;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
-using Leaves.MvcClient.Helpers;
-using Leaves.MvcClient.DataContracts;
+using Leaves.Client.Helpers;
+using Leaves.Client.DataContracts;
 using System.Linq;
 using Leaves.Utils;
 
-namespace Leaves.MvcClient
+namespace Leaves.Client
 {
     public class ApiClient
     {

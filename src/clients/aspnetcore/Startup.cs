@@ -9,10 +9,10 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Leaves.MvcClient.Helpers;
+using Leaves.Client.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace Leaves.MvcClient
+namespace Leaves.Client
 {
     public class Startup
     {
