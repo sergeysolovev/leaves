@@ -21,7 +21,7 @@ git clone https://github.com/sergeysolovev/leaves-api.git
 cd leaves-api
 ```
 
-### Building and running API
+### Building and running the API
 Build and create the database:
 ```
 cd src/api
@@ -47,9 +47,9 @@ It should return `401 Unauthorized`, since ID token is not provided.
 
 ### Identifying requests to the API
 
-To obtain the token, either
+To obtain the token, either:
 * Open <https://leaves-client.now.sh/idtoken>, authenticate and copy it from there; or
-* [Build and run the client](#building-and-running-the-client) locally and do the same: <http://localhost:8081/idtoken>.
+* [Build and run](#building-and-running-the-client) the client locally and do the same: <http://localhost:8081/idtoken>.
 
 Request examples:
 ```
@@ -119,7 +119,7 @@ The output files can be found in `bin/Debug/netcoreapp2.0/linux-x64/publish`
 
 ### Dockerize
 
-Both the API and the client copy Dockerfile to production build output folder
+Both the API and the client copy Dockerfile to production build output folder:
 * [Dockerfile](https://github.com/sergeysolovev/leaves-api/blob/master/src/api/Dockerfile) - the API
 * [Dockerfile](https://github.com/sergeysolovev/leaves-api/blob/master/src/clients/aspnetcore/Dockerfile) - the client
 
@@ -152,7 +152,7 @@ To install now CLI:
 npm install -g now
 ```
 
-To deploy to now.sh there's no need to build the docker images locally, since it is done in the cloud.
+To deploy to [now.sh](https://now.sh) there's no need to build the docker images locally, since it is done in the cloud.
 ```
 # the API
 cd src/api
