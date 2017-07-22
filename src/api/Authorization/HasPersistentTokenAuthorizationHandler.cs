@@ -20,12 +20,14 @@ namespace Leaves.Api
             if (principal == null)
             {
                 context.Fail();
+                return;
             }
 
             var user = await userManager.GetOrCreateUserAsync(principal);
             if (user == null)
             {
                 context.Fail();
+                return;
             }
 
             var token = await userManager.GetAuthenticationTokenAsync(
@@ -37,6 +39,7 @@ namespace Leaves.Api
             if (string.IsNullOrEmpty(token))
             {
                 context.Fail();
+                return;
             }
 
             context.Succeed(requirement);

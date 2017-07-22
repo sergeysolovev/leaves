@@ -21,12 +21,14 @@ namespace Leaves.Api
             if (principal == null)
             {
                 context.Fail();
+                return;
             }
 
             var user = await userManager.GetOrCreateUserAsync(principal);
             if (user == null)
             {
                 context.Fail();
+                return;
             }
 
             var userClaims = await userManager.GetClaimsAsync(user);
@@ -37,6 +39,7 @@ namespace Leaves.Api
             if (!hasClaim)
             {
                 context.Fail();
+                return;
             }
 
             context.Succeed(requirement);
