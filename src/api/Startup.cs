@@ -44,6 +44,7 @@ namespace Leaves.Api
             services
                 .AddMvc()
                 .AddJsonOptions(options => {
+                    options.SerializerSettings.Formatting = Formatting.Indented;
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
