@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Leaves.Api.Services;
 using Leaves.Utils;
 using AutoMapper;
+using Leaves.Api.DataContracts;
 
 namespace Leaves.Api.Domain
 {
@@ -56,6 +57,32 @@ namespace Leaves.Api.Domain
             );
 
             return await googleCalendarClient.AddEventAsync(addEventContract);
+        }
+
+        public async Task<VerifyCalendarAccessContract> VerifyAccess(ClaimsPrincipal principal)
+        {
+            var user = await userManager.GetOrCreateUserAsync(principal);
+            if (user == null)
+            {
+                return new VerifyCalendarAccessContract {
+                    UserId = null,
+                    Authorized = false
+                };
+            }
+
+            var refreshToken = await userManager.GetRefreshTokenAsync(user);
+            if (refreshToken == null)
+            {
+                return new VerifyCalendarAccessContract {
+                    UserId = user.Id,
+                    Authorized = false
+                };
+            }
+
+            return new VerifyCalendarAccessContract {
+                UserId = user.Id,
+                Authorized = true
+            };
         }
 
         public async Task<GrantAccessResult> GrantAccess(
