@@ -19,6 +19,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 
 namespace Leaves.Api
 {
@@ -112,6 +114,28 @@ namespace Leaves.Api
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseStatusCodePages(async (StatusCodeContext context) => {
+                var response = context.HttpContext.Response;
+
+                if (response.StatusCode == 401)
+                {
+                    response.ContentType = "application/json";
+                    var content = new { message = "Authentication required" };
+                    await response.WriteAsync(
+                        JsonConvert.SerializeObject(content, Formatting.Indented)
+                    );
+                }
+
+                if (response.StatusCode == 403)
+                {
+                    response.ContentType = "application/json";
+                    var content = new { message = "Access denied" };
+                    await response.WriteAsync(
+                        JsonConvert.SerializeObject(content, Formatting.Indented)
+                    );
+                }
+            });
+
             app.UseAuthentication();
             app.UseMvc();
         }
