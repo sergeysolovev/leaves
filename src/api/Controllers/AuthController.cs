@@ -16,6 +16,14 @@ namespace Leaves.Api.Controllers
             this.googleCalManager = googleCalManager;
         }
 
+        // GET /auth/googlecal/
+        [HttpGet("googlecal")]
+        [Authorize]
+        public async Task<IActionResult> GoogleCalendar()
+            => Json(
+                await googleCalManager.VerifyAccess(HttpContext.User)
+            );
+
         // POST /auth/googlecal/
         [HttpPost("googlecal")]
         public async Task<IActionResult> GrantAccessToGoogleCalendar(
