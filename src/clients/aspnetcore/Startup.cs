@@ -91,6 +91,18 @@ namespace Leaves.Client
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            if (env.IsProduction())
+            {
+                // Otherwise, redirects from google oidc
+                // would lead to http-endpoints that causes redirects
+                // from http -> https, POST -> GET
+                app.Use((context, next) =>
+                {
+                    context.Request.Scheme = "https";
+                    return next();
+                });
+            }
+
             app.UseAuthentication();
             app.UseMvc();
         }
