@@ -4,8 +4,8 @@ ASP.NET Core 2.0 API and MVC client for applying and managing leaves of absence.
 
 ## Live demo
 
-* [https://leaves-api.now.sh](https://leaves-api.now.sh) - the API
-* [https://leaves-client.now.sh](https://leaves-client.now.sh) - the client
+* <https://leaves-api.now.sh> - the API
+* <https://leaves.now.sh> - the client
 
 ## Getting Started
 
@@ -48,7 +48,7 @@ It should return `401 Unauthorized`, since ID token is not provided.
 ### Identifying requests to the API
 
 To obtain the token, either:
-* Open <https://leaves-client.now.sh/idtoken>, authenticate and copy it from there; or
+* Open <https://leaves.now.sh/idtoken>, authenticate and copy it from there; or
 * [Build and run](#building-and-running-the-client) the client locally and do the same: <http://localhost:8081/idtoken>.
 
 Request examples:
