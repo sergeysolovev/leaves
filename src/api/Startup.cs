@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 namespace Leaves.Api
 {
@@ -114,6 +116,13 @@ namespace Leaves.Api
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+                ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+                KnownNetworks = {
+                    new IPNetwork(IPAddress.Parse("172.29.0.0"), 24)
+                }
+            });
+
             app.UseStatusCodePages(async (StatusCodeContext context) => {
                 var response = context.HttpContext.Response;
 
