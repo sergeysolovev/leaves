@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Leaves.Client.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 namespace Leaves.Client
 {
@@ -91,18 +93,12 @@ namespace Leaves.Client
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsProduction())
-            {
-                // Otherwise, redirects from google oidc
-                // would lead to http-endpoints that causes redirects
-                // from http -> https, POST -> GET
-                // See https://github.com/aspnet/Security/issues/929
-                app.Use((context, next) =>
-                {
-                    context.Request.Scheme = "https";
-                    return next();
-                });
-            }
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+                ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+                KnownNetworks = {
+                    new IPNetwork(IPAddress.Parse("172.29.0.0"), 24)
+                }
+            });
 
             app.UseAuthentication();
             app.UseMvc();
