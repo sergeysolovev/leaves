@@ -1,4 +1,4 @@
-# Leaves API
+# Leaves
 
 ASP.NET Core 2.0 API and MVC client for applying and managing leaves of absence. Authenticates through [Google Open Id Connect](https://developers.google.com/identity/protocols/OpenIDConnect), uses [hybrid server-side flow](https://developers.google.com/identity/sign-in/web/server-side-flow) and [Google Calendar API](https://developers.google.com/google-apps/calendar/) to share an approved leave when the user is offline.
 
@@ -17,8 +17,8 @@ Install [.NET Core 2.0.0 Preview 2](https://github.com/dotnet/core/blob/master/r
 
 Clone this repository and switch to its folder
 ```
-git clone https://github.com/sergeysolovev/leaves-api.git
-cd leaves-api
+git clone https://github.com/sergeysolovev/leaves.git
+cd leaves
 ```
 
 ### Building and running the API
@@ -66,7 +66,7 @@ cd src/clients/aspnetcore
 dotnet build
 ```
 
-Check out the API base url in [appsettings.json](https://github.com/sergeysolovev/leaves-api/blob/master/src/clients/aspnetcore/appsettings.json):
+Check out the API base url in [appsettings.json](https://github.com/sergeysolovev/leaves/blob/master/src/clients/aspnetcore/appsettings.json):
 ```
 "LeavesApi": {
   "BaseUrl": "http://localhost:8080/"
@@ -120,8 +120,8 @@ The output files can be found in `bin/Debug/netcoreapp2.0/linux-x64/publish`
 ### Dockerizing
 
 Both the API and the client copy Dockerfile to production build output folder:
-* [Dockerfile](https://github.com/sergeysolovev/leaves-api/blob/master/src/api/Dockerfile) - the API
-* [Dockerfile](https://github.com/sergeysolovev/leaves-api/blob/master/src/clients/aspnetcore/Dockerfile) - the client
+* [Dockerfile](https://github.com/sergeysolovev/leaves/blob/master/src/api/Dockerfile) - the API
+* [Dockerfile](https://github.com/sergeysolovev/leaves/blob/master/src/clients/aspnetcore/Dockerfile) - the client
 
 Install [docker](https://www.docker.com/) to build the images and run locally. Build:
 ```
@@ -182,7 +182,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 * **Sergey Solovev** - [sergeysolovev](https://github.com/sergeysolovev)
 * **Max Ermolaev** - [lainiwakurafan](https://github.com/lainiwakurafan)
 
-See also the list of [contributors](https://github.com/sergeysolovev/leaves-api/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/sergeysolovev/leaves/contributors) who participated in this project.
 
 ## License
 
